@@ -22,10 +22,10 @@ class Location(BaseModel):
     )
     model_config = ConfigDict(frozen=True)
 
-    def __eq__(self, other: "Location"):
+    def __eq__(self, other: "Location") -> bool:
         return self.x == other.x and self.y == other.y
 
-    def distance_to(self, other: "Location"):
+    def distance_to(self, other: "Location") -> int:
         """Расстояние между Location - это совокупное количество шагов по X и Y, которое необходимо сделать курьеру, чтобы достигнуть точки"""
         return abs(self.x - other.x) + abs(self.y - other.y)
 
