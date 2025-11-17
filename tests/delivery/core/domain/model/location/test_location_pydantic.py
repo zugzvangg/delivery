@@ -3,7 +3,7 @@ import random
 import pytest
 from pydantic import ValidationError
 
-from src.delivery.core.domain.model.location import Location
+from src.delivery.core.domain.model.location.location import Location
 
 
 class TestLocation:
