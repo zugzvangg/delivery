@@ -20,6 +20,16 @@ class TestStoragePlace:
         assert storage.order_id is None
         assert isinstance(storage.id, uuid.UUID)
 
+    def test_if_private_variables_are_available(self):
+        """Тест что приватные переменные недоступны"""
+        name, total_volume = "Рюкзак", 50
+        storage = StoragePlace(name="Рюкзак", total_volume=50)
+
+        with pytest.raises(AttributeError):
+            storage.__name == name
+        with pytest.raises(AttributeError):
+            storage.__total_volume == total_volume
+
     def test_create_storage_place_with_order_id(self):
         """Тест создания места хранения с order_id"""
         # Arrange
