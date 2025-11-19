@@ -1,28 +1,41 @@
 import random
 from typing import ClassVar
 
-# hope I can use it :)
-from pydantic import BaseModel, ConfigDict, Field
 
-
-class Location(BaseModel):
+class Location:
     """Value Object, представляющий координату на доске"""
 
-    MIN_COORD: ClassVar[int] = 1
-    MAX_COORD: ClassVar[int] = 10
-    x: int = Field(
-        ge=MIN_COORD,
-        le=MAX_COORD,
-        description=f"Горизонтальная координата ({MIN_COORD}-{MAX_COORD})",
-    )
-    y: int = Field(
-        ge=MIN_COORD,
-        le=MAX_COORD,
-        description=f"Вертикальная координата ({MIN_COORD}-{MAX_COORD})",
-    )
-    model_config = ConfigDict(frozen=True)
+    def __init__(self, x: int, y: int):
+        self.__MIN_COORD: int = 1
+        self.__MAX_COORD: int = 10
+        self._validate_coord(x, "x")
+        self._validate_coord(y, "y")
+        self.__x = x
+        self.__y = y
+
+    @property
+    def x(self) -> int:
+        """Горизонтальная координата"""
+        return self.__x
+
+    @property
+    def y(self) -> int:
+        """Вертикальная координата"""
+        return self.__y
+
+    def _validate_coord(self, coord: int, coord_name: str) -> None:
+        """Валидация координаты"""
+        if not isinstance(coord, int):
+            raise TypeError(f"{coord_name} должен быть целым числом")
+        if not (self.__MIN_COORD <= coord <= self.__MAX_COORD):
+            raise ValueError(
+                f"{coord_name} должен быть в диапазоне "
+                f"{self.__MIN_COORD}-{self.__MAX_COORD}, получено {coord}"
+            )
 
     def __eq__(self, other: "Location") -> bool:
+        if not isinstance(other, Location):
+            return NotImplemented
         return self.x == other.x and self.y == other.y
 
     def distance_to(self, other: "Location") -> int:
@@ -31,8 +44,8 @@ class Location(BaseModel):
 
     @classmethod
     def create_random(cls, self):
-        x = random.randint(self.MIN_COORD, self.MAX_COORD)
-        y = random.randint(self.MIN_COORD, self.MAX_COORD)
+        x = random.randint(self.__MIN_COORD, self.__MAX_COORD)
+        y = random.randint(self.__MIN_COORD, self.__MAX_COORD)
         return cls(x=x, y=y)
 
     @classmethod

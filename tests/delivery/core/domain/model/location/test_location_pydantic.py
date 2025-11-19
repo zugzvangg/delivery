@@ -1,7 +1,6 @@
 import random
 
 import pytest
-from pydantic import ValidationError
 
 from src.delivery.core.domain.model.location.location import Location
 
@@ -27,24 +26,33 @@ class TestLocation:
         assert location.x == 10
         assert location.y == 10
 
+    def test_if_private_variables_are_available(self):
+        """Тест что приватные переменные недоступны"""
+        x, y = 1, 2
+        location = Location(x=x, y=x)
+        with pytest.raises(AttributeError):
+            location.__x == x
+        with pytest.raises(AttributeError):
+            location.__y == y
+
     def test_create_invalid_x_coordinate_too_low(self):
         """Тест создания Location с x координатой меньше минимальной"""
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValueError):
             Location(x=0, y=5)
 
     def test_create_invalid_x_coordinate_too_high(self):
         """Тест создания Location с x координатой больше максимальной"""
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValueError):
             Location(x=11, y=5)
 
     def test_create_invalid_y_coordinate_too_low(self):
         """Тест создания Location с y координатой меньше минимальной"""
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValueError):
             Location(x=5, y=0)
 
     def test_create_invalid_y_coordinate_too_high(self):
         """Тест создания Location с y координатой больше максимальной"""
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValueError):
             Location(x=5, y=11)
 
     def test_equality(self):
@@ -106,8 +114,8 @@ class TestLocation:
         location = Location(x=4, y=6)
 
         # Попытка изменить атрибут должна вызвать ошибку
-        with pytest.raises(ValidationError):
+        with pytest.raises(AttributeError):
             location.x = 5
 
-        with pytest.raises(ValidationError):
+        with pytest.raises(AttributeError):
             location.y = 7
