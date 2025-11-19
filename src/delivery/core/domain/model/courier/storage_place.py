@@ -1,90 +1,108 @@
 import uuid
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, Field
 
+class StoragePlace:
+    """Entity места хранения"""
 
-class StoragePlace(BaseModel):
-    id: uuid.UUID = Field(
-        default_factory=uuid.uuid4,
-        description="Уникальный идентификатор места хранения",
-        examples=["a1b2c3d4-e5f6-7890-abcd-ef1234567890"],
-    )
-    name: str = Field(
-        min_length=1,
-        description="Название места хранения: рюкзак, багажник и т.п.",
-        examples=["Рюкзак"],
-    )
-    total_volume: int = Field(
-        gt=0,
-        description="Допустимый объем (должен быть больше 0)",
-        examples=[50],
-    )
-    order_id: Optional[uuid.UUID] = Field(
-        default=None,
-        description="Идентификатор заказа, который хранится в месте хранения",
-        examples=["b2c3d4e5-f6g7-8901-bcde-f23456789012"],
-    )
+    def __init__(
+        self,
+        name: str,
+        total_volume: int,
+        id: Optional[uuid.UUID] = None,
+        order_id: Optional[uuid.UUID] = None,
+    ):
+        self.__validate_name(name)
+        self.__validate_total_volume(total_volume)
+        if id:
+            self.__validate_id(id, "id")
+        if order_id:
+            self.__validate_id(order_id, "order_id")
 
-    model_config = ConfigDict(
-        frozen=True,
-        extra="forbid",
-        json_schema_extra={
-            "example": {
-                "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-                "name": "Рюкзак",
-                "total_volume": 50,
-                "order_id": "b2c3d4e5-f6g7-8901-bcde-f23456789012",
-            }
-        },
-    )
+        self.__id = id if id is not None else uuid.uuid4()
+        self.__name = name
+        self.__total_volume = total_volume
+        self.__order_id = order_id
+
+    @classmethod
+    def create(cls, name: str, total_volume: int) -> "StoragePlace":
+        """Фабричный метод для создания места хранения"""
+        return cls(name=name, total_volume=total_volume)
+
+    # Геттеры для доступа к приватным полям
+    @property
+    def id(self) -> uuid.UUID:
+        """Уникальный идентификатор места хранения"""
+        return self.__id
+
+    @property
+    def name(self) -> str:
+        """Название места хранения: рюкзак, багажник и т.п."""
+        return self.__name
+
+    @property
+    def total_volume(self) -> int:
+        """Допустимый объем (должен быть больше 0)"""
+        return self.__total_volume
+
+    @property
+    def order_id(self) -> Optional[uuid.UUID]:
+        """Идентификатор заказа, который хранится в месте хранения"""
+        return self.__order_id
+
+    @staticmethod
+    def __validate_id(id: uuid.UUID, var_name: str) -> None:
+        """Может провалидировать и id, и order_id"""
+        if not isinstance(id, uuid.UUID):
+            raise ValueError(f"{var_name} if must be of type uuid.UUID")
+
+    @staticmethod
+    def __validate_name(name: str) -> None:
+        if not isinstance(name, str) or len(name.strip()) == 0:
+            raise ValueError("Name must be a non-empty string")
+
+    @staticmethod
+    def __validate_total_volume(total_volume: int) -> None:
+        if not isinstance(total_volume, int) or total_volume <= 0:
+            raise ValueError("Total volume must be a positive integer")
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, StoragePlace):
             return False
         return self.id == other.id
 
-    @classmethod
-    def create(cls, name: str, total_volume: int):
-        return cls(name=name, total_volume=total_volume)
-
     def can_store(self, volume: int) -> bool:
         """Проверка возможности размещения заказа"""
-
         if not isinstance(volume, int) or volume <= 0:
             raise ValueError("Volume must be a positive integer!")
-        if volume > self.total_volume:
+        if volume > self.__total_volume:
             return False
-        if self._is_occupied():
+        if self.__is_occupied():
             return False
         return True
 
     def store(self, order_id: uuid.UUID, volume: int) -> None:
         """Размещение заказа в месте хранения"""
-        if not isinstance(order_id, uuid.UUID):
-            raise ValueError("Order ID must be a UUID")
+        self.__validate_id(order_id, "order_id")
         if not self.can_store(volume):
             raise ValueError(
                 "Cannot store order - storage is occupied or volume exceeds capacity"
             )
-
-        # NOTE: кривовато, но pydantic не дает создавать названия переменных вида "_<name>" или "__<name>", но зато атрибуты приватные
-        object.__setattr__(self, "order_id", order_id)
+        self.__order_id = order_id
 
     def clear(self, order_id: uuid.UUID) -> None:
         """Извлечение заказа из места хранения"""
-        if not self._is_occupied():
+        if not self.__is_occupied():
             raise ValueError("Cannot clear - storage is not occupied")
-        if self.order_id != order_id:
+        if self.__order_id != order_id:
             raise ValueError("Order ID does not match the stored order")
-        # NOTE: кривовато, но pydantic не дает создавать названия переменных вида "_<name>" или "__<name>", но зато атрибуты приватные
-        object.__setattr__(self, "order_id", None)
+        self.__order_id = None
 
-    def _is_occupied(self) -> bool:
+    def __is_occupied(self) -> bool:
         """Приватный метод проверки занятости"""
-        return self.order_id is not None
+        return self.__order_id is not None
 
     @property
     def is_empty(self) -> bool:
         """Публичное свойство для проверки пустоты"""
-        return not self._is_occupied()
+        return not self.__is_occupied()
