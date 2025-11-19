@@ -2,7 +2,10 @@ import random
 
 import pytest
 
-from src.delivery.core.domain.model.location.location import Location
+from src.delivery.core.domain.model.location.location import (
+    Location,
+    WrongCoordinateError,
+)
 
 
 class TestLocation:
@@ -37,22 +40,22 @@ class TestLocation:
 
     def test_create_invalid_x_coordinate_too_low(self):
         """Тест создания Location с x координатой меньше минимальной"""
-        with pytest.raises(ValueError):
+        with pytest.raises(WrongCoordinateError):
             Location(x=0, y=5)
 
     def test_create_invalid_x_coordinate_too_high(self):
         """Тест создания Location с x координатой больше максимальной"""
-        with pytest.raises(ValueError):
+        with pytest.raises(WrongCoordinateError):
             Location(x=11, y=5)
 
     def test_create_invalid_y_coordinate_too_low(self):
         """Тест создания Location с y координатой меньше минимальной"""
-        with pytest.raises(ValueError):
+        with pytest.raises(WrongCoordinateError):
             Location(x=5, y=0)
 
     def test_create_invalid_y_coordinate_too_high(self):
         """Тест создания Location с y координатой больше максимальной"""
-        with pytest.raises(ValueError):
+        with pytest.raises(WrongCoordinateError):
             Location(x=5, y=11)
 
     def test_equality(self):
@@ -118,4 +121,5 @@ class TestLocation:
             location.x = 5
 
         with pytest.raises(AttributeError):
+            location.y = 7
             location.y = 7

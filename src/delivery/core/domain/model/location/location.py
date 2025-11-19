@@ -1,5 +1,8 @@
 import random
-from typing import ClassVar
+
+
+class WrongCoordinateError(Exception):
+    pass
 
 
 class Location:
@@ -26,9 +29,9 @@ class Location:
     def _validate_coord(self, coord: int, coord_name: str) -> None:
         """Валидация координаты"""
         if not isinstance(coord, int):
-            raise TypeError(f"{coord_name} должен быть целым числом")
+            raise WrongCoordinateError(f"{coord_name} должен быть целым числом")
         if not (self.__MIN_COORD <= coord <= self.__MAX_COORD):
-            raise ValueError(
+            raise WrongCoordinateError(
                 f"{coord_name} должен быть в диапазоне "
                 f"{self.__MIN_COORD}-{self.__MAX_COORD}, получено {coord}"
             )

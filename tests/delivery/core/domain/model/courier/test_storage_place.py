@@ -2,7 +2,14 @@ import uuid
 
 import pytest
 
-from src.delivery.core.domain.model.courier.storage_place import StoragePlace
+from src.delivery.core.domain.model.courier.storage_place import (
+    InvalidStoragePlaceName,
+    InvalidStoragePlaceVolume,
+    InvalidUUIDError,
+    StorageOccupiedError,
+    StoragePlace,
+    StoragePlaceClearWrongOrderId,
+)
 
 
 class TestStoragePlace:
@@ -86,13 +93,19 @@ class TestStoragePlace:
         storage = StoragePlace(name="Рюкзак", total_volume=50)
 
         # Act & Assert
-        with pytest.raises(ValueError, match="Volume must be a positive integer!"):
+        with pytest.raises(
+            InvalidStoragePlaceVolume, match="Volume must be a positive integer!"
+        ):
             storage.can_store(0)
 
-        with pytest.raises(ValueError, match="Volume must be a positive integer!"):
+        with pytest.raises(
+            InvalidStoragePlaceVolume, match="Volume must be a positive integer!"
+        ):
             storage.can_store(-10)
 
-        with pytest.raises(ValueError, match="Volume must be a positive integer!"):
+        with pytest.raises(
+            InvalidStoragePlaceVolume, match="Volume must be a positive integer!"
+        ):
             storage.can_store("invalid")
 
     def test_store_successfully(self):
@@ -118,7 +131,7 @@ class TestStoragePlace:
 
         # Act & Assert
         with pytest.raises(
-            ValueError,
+            StorageOccupiedError,
             match="Cannot store order - storage is occupied or volume exceeds capacity",
         ):
             storage.store(new_order_id, 10)
@@ -131,7 +144,7 @@ class TestStoragePlace:
 
         # Act & Assert
         with pytest.raises(
-            ValueError,
+            StorageOccupiedError,
             match="Cannot store order - storage is occupied or volume exceeds capacity",
         ):
             storage.store(order_id, 51)
@@ -142,7 +155,9 @@ class TestStoragePlace:
         storage = StoragePlace(name="Рюкзак", total_volume=50)
 
         # Act & Assert
-        with pytest.raises(ValueError, match="order_id if must be of type uuid.UUID"):
+        with pytest.raises(
+            InvalidUUIDError, match="order_id if must be of type uuid.UUID"
+        ):
             storage.store("invalid_order_id", 30)
 
     def test_clear_successfully(self):
@@ -165,7 +180,9 @@ class TestStoragePlace:
         order_id = uuid.uuid4()
 
         # Act & Assert
-        with pytest.raises(ValueError, match="Cannot clear - storage is not occupied"):
+        with pytest.raises(
+            StorageOccupiedError, match="Cannot clear - storage is not occupied"
+        ):
             storage.clear(order_id)
 
     def test_clear_fails_when_order_id_mismatch(self):
@@ -177,7 +194,8 @@ class TestStoragePlace:
 
         # Act & Assert
         with pytest.raises(
-            ValueError, match="Order ID does not match the stored order"
+            StoragePlaceClearWrongOrderId,
+            match="Order ID does not match the stored order",
         ):
             storage.clear(wrong_order_id)
 
@@ -212,16 +230,16 @@ class TestStoragePlace:
     def test_validation_name_min_length(self):
         """Тест валидации минимальной длины имени"""
         # Act & Assert
-        with pytest.raises(ValueError):
+        with pytest.raises(InvalidStoragePlaceName):
             StoragePlace(name="", total_volume=50)
 
     def test_validation_total_volume_positive(self):
         """Тест валидации положительного объема"""
         # Act & Assert
-        with pytest.raises(ValueError):
+        with pytest.raises(InvalidStoragePlaceVolume):
             StoragePlace(name="Рюкзак", total_volume=0)
 
-        with pytest.raises(ValueError):
+        with pytest.raises(InvalidStoragePlaceVolume):
             StoragePlace(name="Рюкзак", total_volume=-10)
 
     @pytest.mark.parametrize(
@@ -241,5 +259,6 @@ class TestStoragePlace:
         assert storage.name == name
         assert storage.total_volume == total_volume
         assert storage.order_id is None
+        assert isinstance(storage.id, uuid.UUID)
         assert isinstance(storage.id, uuid.UUID)
         assert isinstance(storage.id, uuid.UUID)

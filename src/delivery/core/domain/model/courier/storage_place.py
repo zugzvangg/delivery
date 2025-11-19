@@ -2,6 +2,30 @@ import uuid
 from typing import Optional
 
 
+class NotEnoughVolumeError(Exception):
+    pass
+
+
+class StorageOccupiedError(Exception):
+    pass
+
+
+class InvalidUUIDError(Exception):
+    pass
+
+
+class InvalidStoragePlaceName(Exception):
+    pass
+
+
+class InvalidStoragePlaceVolume(Exception):
+    pass
+
+
+class StoragePlaceClearWrongOrderId(Exception):
+    pass
+
+
 class StoragePlace:
     """Entity места хранения"""
 
@@ -54,17 +78,17 @@ class StoragePlace:
     def __validate_id(id: uuid.UUID, var_name: str) -> None:
         """Может провалидировать и id, и order_id"""
         if not isinstance(id, uuid.UUID):
-            raise ValueError(f"{var_name} if must be of type uuid.UUID")
+            raise InvalidUUIDError(f"{var_name} if must be of type uuid.UUID")
 
     @staticmethod
     def __validate_name(name: str) -> None:
         if not isinstance(name, str) or len(name.strip()) == 0:
-            raise ValueError("Name must be a non-empty string")
+            raise InvalidStoragePlaceName("Name must be a non-empty string")
 
     @staticmethod
     def __validate_total_volume(total_volume: int) -> None:
         if not isinstance(total_volume, int) or total_volume <= 0:
-            raise ValueError("Total volume must be a positive integer")
+            raise InvalidStoragePlaceVolume("Total volume must be a positive integer")
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, StoragePlace):
@@ -74,7 +98,7 @@ class StoragePlace:
     def can_store(self, volume: int) -> bool:
         """Проверка возможности размещения заказа"""
         if not isinstance(volume, int) or volume <= 0:
-            raise ValueError("Volume must be a positive integer!")
+            raise InvalidStoragePlaceVolume("Volume must be a positive integer!")
         if volume > self.__total_volume:
             return False
         if self.__is_occupied():
@@ -85,7 +109,7 @@ class StoragePlace:
         """Размещение заказа в месте хранения"""
         self.__validate_id(order_id, "order_id")
         if not self.can_store(volume):
-            raise ValueError(
+            raise StorageOccupiedError(
                 "Cannot store order - storage is occupied or volume exceeds capacity"
             )
         self.__order_id = order_id
@@ -93,9 +117,11 @@ class StoragePlace:
     def clear(self, order_id: uuid.UUID) -> None:
         """Извлечение заказа из места хранения"""
         if not self.__is_occupied():
-            raise ValueError("Cannot clear - storage is not occupied")
+            raise StorageOccupiedError("Cannot clear - storage is not occupied")
         if self.__order_id != order_id:
-            raise ValueError("Order ID does not match the stored order")
+            raise StoragePlaceClearWrongOrderId(
+                "Order ID does not match the stored order"
+            )
         self.__order_id = None
 
     def __is_occupied(self) -> bool:
