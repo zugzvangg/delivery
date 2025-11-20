@@ -1,5 +1,3 @@
-import random
-
 import pytest
 
 from src.delivery.core.domain.model.location.location import (
