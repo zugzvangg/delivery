@@ -40,9 +40,7 @@ class Order:
 
     @staticmethod
     def __validate_location(location: Location) -> bool:
-        if isinstance(location, Location):
-            return True
-        else:
+        if not isinstance(location, Location):
             raise WrongLocationTypeError(
                 "'location' variable should be of Location type"
             )
