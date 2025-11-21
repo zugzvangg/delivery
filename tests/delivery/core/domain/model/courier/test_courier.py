@@ -6,7 +6,7 @@ from src.delivery.core.domain.model.courier.courier import Courier
 from src.delivery.core.domain.model.location.location import Location
 
 
-class TestStoragePlace:
+class TestCourier:
     """Тесты для класса Courier"""
 
     def test_create_courier_with_default_values(self):
