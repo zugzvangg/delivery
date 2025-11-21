@@ -6,6 +6,6 @@ class InvalidUUIDError(Exception):
 
 
 def validate_uuid(id: uuid.UUID, id_name: str):
-    """Может провалидировать и id, и order_id"""
+    """Может провалидировать UUID, который много где нужен в проекте"""
     if not isinstance(id, uuid.UUID):
         raise InvalidUUIDError(f"{id_name} if must be of type uuid.UUID")
