@@ -80,17 +80,18 @@ class Order:
 
     def assign(self, courier_id: uuid.UUID) -> None:
         validate_uuid(courier_id, "courier_id")
-        if self.__status == OrderStatus.CREATED:
-            self.__status = OrderStatus.ASSIGNED
-        else:
-            raise NotCreatedOrderStatus
+        if self.__status != OrderStatus.CREATED:
+            raise NotCreatedOrderStatus("Can only assign orders with CREATED status")
+
+        self.__status = OrderStatus.ASSIGNED
         self.__courier_id = courier_id
 
     def complete(self) -> None:
-        if self.__status == OrderStatus.ASSIGNED:
-            self.__status = OrderStatus.COMPLETED
-        else:
-            raise NotAssignedOrderStatus
+        if self.__status != OrderStatus.ASSIGNED:
+            raise NotAssignedOrderStatus(
+                "Can only complete orders with ASSIGNED status"
+            )
+        self.__status = OrderStatus.COMPLETED
 
     @classmethod
     def create(cls, order_id: uuid.UUID, location: Location, volume: int):
