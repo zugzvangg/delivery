@@ -8,11 +8,15 @@ from src.delivery.core.domain.model.order.order import Order
 from src.delivery.core.domain.model.order.order_status import OrderStatus
 
 
-class WrongLocationTypeError(Exception):
+class InvalidCourierNameError(Exception):
     pass
 
 
-class InvalidVolume(Exception):
+class InvalidCourierSpeedError(Exception):
+    pass
+
+
+class InvalidCourierLocationTypeError(Exception):
     pass
 
 
@@ -21,17 +25,34 @@ class Courier:
 
     def __init__(self, name: str, speed: int, location: Location):
 
-        # self.__validate_name(name)
-        # self.__validate_speed(speed)
-        # self.__validate_location(location)
+        self.__validate_name(name)
+        self.__validate_speed(speed)
+        self.__validate_location(location)
 
-        self.__storage_places: list[StoragePlace] = [
-            StoragePlace(name="Сумка", total_volume=10)
-        ]
         self.__id = uuid.uuid4()
         self.__name = name
         self.__speed = speed
         self.__location = location
+        self.__storage_places: list[StoragePlace] = [
+            StoragePlace(name="Сумка", total_volume=10)
+        ]
+
+    @staticmethod
+    def __validate_name(name: str) -> None:
+        if not isinstance(name, str) or len(name.strip()) == 0:
+            raise InvalidCourierNameError("Name must be a non-empty string")
+
+    @staticmethod
+    def __validate_speed(name: str) -> None:
+        if not isinstance(name, int):
+            raise InvalidCourierSpeedError("Speed must be a positive integer")
+
+    @staticmethod
+    def __validate_location(location: Location) -> None:
+        if not isinstance(location, Location):
+            raise InvalidCourierLocationTypeError(
+                "'location' variable should be of Location type"
+            )
 
     def add_storage_place(self, name: str, volume: int):
         storage_place = StoragePlace(name=name, total_volume=volume)
@@ -81,6 +102,6 @@ class Courier:
         """OrderStatus доставки заказа"""
         return self.__status
 
-    # @classmethod
-    # def create(cls, order_id: uuid.UUID, location: Location, volume: int):
-    #     return cls(id=order_id, location=location, volume=volume)
+    @classmethod
+    def create(cls, name: str, speed: int, location: Location):
+        return cls(name=name, speed=speed, location=location)

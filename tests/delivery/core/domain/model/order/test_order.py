@@ -6,9 +6,9 @@ import pytest
 from src.delivery.core.domain.model.common import InvalidUUIDError
 from src.delivery.core.domain.model.location.location import Location
 from src.delivery.core.domain.model.order.order import (
-    InvalidVolume,
+    InvalidOrderLocationError,
+    InvalidOrderVolumeError,
     Order,
-    WrongLocationTypeError,
 )
 from src.delivery.core.domain.model.order.order_status import (
     NotAssignedOrderStatus,
@@ -65,7 +65,7 @@ class TestOrder:
         invalid_location = "not-a-location"
 
         # Act & Assert
-        with pytest.raises(WrongLocationTypeError):
+        with pytest.raises(InvalidOrderLocationError):
             Order.create(valid_order_id, invalid_location, valid_volume)
 
     def test_create_order_with_invalid_volume_type(
@@ -76,7 +76,7 @@ class TestOrder:
         invalid_volume = "not-an-int"
 
         # Act & Assert
-        with pytest.raises(InvalidVolume):
+        with pytest.raises(InvalidOrderVolumeError):
             Order.create(valid_order_id, valid_location, invalid_volume)
 
     def test_create_order_with_non_positive_volume(
@@ -88,7 +88,7 @@ class TestOrder:
 
         for volume in non_positive_volumes:
             # Act & Assert
-            with pytest.raises(InvalidVolume):
+            with pytest.raises(InvalidOrderVolumeError):
                 Order.create(valid_order_id, valid_location, volume)
 
     def test_assign_order_success(

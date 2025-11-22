@@ -5,17 +5,16 @@ from src.delivery.core.domain.model.common import validate_uuid
 from src.delivery.core.domain.model.location.location import Location
 from src.delivery.core.domain.model.order.order_status import (
     NotAssignedOrderStatus,
-    NotCompletedOrderStatus,
     NotCreatedOrderStatus,
     OrderStatus,
 )
 
 
-class WrongLocationTypeError(Exception):
+class InvalidOrderLocationError(Exception):
     pass
 
 
-class InvalidVolume(Exception):
+class InvalidOrderVolumeError(Exception):
     pass
 
 
@@ -39,16 +38,16 @@ class Order:
         self.__status = OrderStatus.CREATED
 
     @staticmethod
-    def __validate_location(location: Location) -> bool:
+    def __validate_location(location: Location) -> None:
         if not isinstance(location, Location):
-            raise WrongLocationTypeError(
+            raise InvalidOrderLocationError(
                 "'location' variable should be of Location type"
             )
 
     @staticmethod
     def __validate_volume(volume: int):
         if not isinstance(volume, int) or volume <= 0:
-            raise InvalidVolume("volume must be a positive integer")
+            raise InvalidOrderVolumeError("volume must be a positive integer")
 
     # Геттеры для доступа к приватным полям
     @property
