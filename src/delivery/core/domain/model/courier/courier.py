@@ -93,14 +93,14 @@ class Courier:
         return self.__speed
 
     @property
-    def name(self) -> Optional[uuid.UUID]:
+    def name(self) -> str:
         """name курьера"""
         return self.__name
-
+    
     @property
-    def status(self) -> OrderStatus:
-        """OrderStatus доставки заказа"""
-        return self.__status
+    def storage_places(self) -> list[StoragePlace]:
+        """StoragePlaces курьера"""
+        return self.__storage_places
 
     @classmethod
     def create(cls, name: str, speed: int, location: Location):
