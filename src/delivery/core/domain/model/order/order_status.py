@@ -14,6 +14,6 @@ class NotCompletedOrderStatus(Exception):
 
 
 class OrderStatus(Enum):
-    CREATED = "CREATED"
-    ASSIGNED = "ASSIGNED"
-    COMPLETED = "COMPLETED"
+    CREATED: str = "CREATED"
+    ASSIGNED: str = "ASSIGNED"
+    COMPLETED: str = "COMPLETED"

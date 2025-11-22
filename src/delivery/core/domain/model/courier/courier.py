@@ -16,7 +16,15 @@ class InvalidCourierSpeedError(Exception):
     pass
 
 
+class CourierCanNotCompleteOrderError(Exception):
+    pass
+
+
 class InvalidCourierLocationTypeError(Exception):
+    pass
+
+
+class CourierCanNotTakeOrderError(Exception):
     pass
 
 
@@ -29,10 +37,10 @@ class Courier:
         self.__validate_speed(speed)
         self.__validate_location(location)
 
-        self.__id = uuid.uuid4()
-        self.__name = name
-        self.__speed = speed
-        self.__location = location
+        self.__id: uuid.UUID = uuid.uuid4()
+        self.__name: str = name
+        self.__speed: int = speed
+        self.__location: Location = location
         self.__storage_places: list[StoragePlace] = [
             StoragePlace(name="Сумка", total_volume=10)
         ]
@@ -43,8 +51,8 @@ class Courier:
             raise InvalidCourierNameError("Name must be a non-empty string")
 
     @staticmethod
-    def __validate_speed(name: str) -> None:
-        if not isinstance(name, int):
+    def __validate_speed(speed: int) -> None:
+        if not isinstance(speed, int) or speed <= 0:
             raise InvalidCourierSpeedError("Speed must be a positive integer")
 
     @staticmethod
@@ -54,27 +62,68 @@ class Courier:
                 "'location' variable should be of Location type"
             )
 
-    def add_storage_place(self, name: str, volume: int):
+    def add_storage_place(self, name: str, volume: int) -> None:
+        """Добавить место хранения"""
         storage_place = StoragePlace(name=name, total_volume=volume)
         self.__storage_places.append(storage_place)
 
     def can_take_order(self, order: Order) -> bool:
-        for storage_place in self.__storage_places:
-            if storage_place.can_store(order.volume):
-                return True
-        return False
+        """Проверка, может ли курьер взять заказ"""
+        can_take_order = any(
+            storage_place.can_store(order.volume)
+            for storage_place in self.__storage_places
+        )
+        return can_take_order
 
     def take_order(self, order: Order) -> None:
-        pass
+        if not self.can_take_order(order):
+            raise CourierCanNotTakeOrderError("Courier can not take this order")
 
-    def complete_order(order: Order) -> None:
-        pass
+        if order.status != OrderStatus.CREATED:
+            raise CourierCanNotTakeOrderError("Order status is not CREATED")
+
+        for storage_place in self.__storage_places:
+            if storage_place.can_store(volume=order.volume):
+                # кладём заказ в первый доступный storage_place
+                storage_place.store(order_id=order.id, volume=order.volume)
+                # назначаем заказ на курьера
+                order.assign(self.__id)
+                break
+
+    def complete_order(self, order: Order) -> None:
+        order_found = False
+        for storage_place in self.__storage_places:
+            if storage_place.order_id == order.id:
+                storage_place.clear(order_id=order.id)
+                order_found = True
+                break
+        if not order_found:
+            raise CourierCanNotCompleteOrderError(
+                "Order not found in courier's storage"
+            )
+
+        order.complete()
 
     def calculate_time_to_location(self, location: Location) -> float:
-        pass
+        self.__validate_location(location)
+        return self.__location.distance_to(location) / self.__speed
 
     def move(self, target: Location) -> None:
-        pass
+        self.__validate_location(target)
+        difX = target.x - self.__location.x
+        difY = target.y - self.__location.y
+        cruising_range = self.__speed
+
+        moveX: int = int(max(-cruising_range, min(difX, cruising_range)))
+        cruising_range -= abs(moveX)
+
+        moveY: int = int(max(-cruising_range, min(difY, cruising_range)))
+
+        location_create_result = Location(
+            self.__location.x + moveX, self.__location.y + moveY
+        )
+        # меняем location курьера
+        self.__location = location_create_result
 
     # Геттеры для доступа к приватным полям
     @property
@@ -96,11 +145,11 @@ class Courier:
     def name(self) -> str:
         """name курьера"""
         return self.__name
-    
+
     @property
     def storage_places(self) -> list[StoragePlace]:
         """StoragePlaces курьера"""
-        return self.__storage_places
+        return self.__storage_places.copy()
 
     @classmethod
     def create(cls, name: str, speed: int, location: Location):

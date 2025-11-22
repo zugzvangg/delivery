@@ -41,10 +41,10 @@ class StoragePlace:
         if order_id:
             validate_uuid(order_id, "order_id")
 
-        self.__id = id if id is not None else uuid.uuid4()
-        self.__name = name
-        self.__total_volume = total_volume
-        self.__order_id = order_id
+        self.__id: uuid.UUID = id if id is not None else uuid.uuid4()
+        self.__name: str = name
+        self.__total_volume: int = total_volume
+        self.__order_id: uuid.uuid4 = order_id
 
     @classmethod
     def create(cls, name: str, total_volume: int) -> "StoragePlace":

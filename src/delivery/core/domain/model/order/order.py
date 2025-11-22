@@ -31,11 +31,11 @@ class Order:
         self.__validate_location(location)
         self.__validate_volume(volume)
 
-        self.__id = id
-        self.__location = location
-        self.__volume = volume
-        self.__courier_id = None
-        self.__status = OrderStatus.CREATED
+        self.__id: uuid.UUID = id
+        self.__location: Location = location
+        self.__volume: int = volume
+        self.__courier_id: uuid.UUID = None
+        self.__status: OrderStatus = OrderStatus.CREATED
 
     @staticmethod
     def __validate_location(location: Location) -> None:
