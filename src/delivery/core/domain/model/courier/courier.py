@@ -86,9 +86,17 @@ class Courier:
             if storage_place.can_store(volume=order.volume):
                 # кладём заказ в первый доступный storage_place
                 storage_place.store(order_id=order.id, volume=order.volume)
-                # назначаем заказ на курьера
-                order.assign(self.__id)
+                # NO: назначаем заказ на курьера
+                # Аггрегат не может изменять другой аггрегат
+                # order.assign(self.__id)
                 break
+
+    def get_assigned_order_id(self) -> Optional[uuid.UUID]:
+        """Получить ID заказа, который сейчас у курьера"""
+        for storage_place in self.__storage_places:
+            if storage_place.order_id is not None:
+                return storage_place.order_id
+        return None
 
     def complete_order(self, order: Order) -> None:
         order_found = False
@@ -101,8 +109,8 @@ class Courier:
             raise CourierCanNotCompleteOrderError(
                 "Order not found in courier's storage"
             )
-
-        order.complete()
+        # Аггрегат не может изменять другой аггрегат
+        # order.complete()
 
     def calculate_time_to_location(self, location: Location) -> float:
         self.__validate_location(location)

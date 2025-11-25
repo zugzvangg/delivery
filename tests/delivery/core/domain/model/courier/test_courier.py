@@ -153,9 +153,9 @@ class TestCourier:
             for storage in valid_courier.storage_places
         )
         assert order_in_storage is True
-        assert small_order.status == OrderStatus.ASSIGNED
-        assert small_order.courier_id == valid_courier.id
-        assert initial_order_status == OrderStatus.CREATED
+        assert small_order.status == initial_order_status  # Остался CREATED
+        assert small_order.courier_id is None  # Не назначен
+        assert valid_courier.get_assigned_order_id() == small_order.id
 
     def test_take_order_when_cannot_take(self, valid_courier, large_order):
         """Тест попытки взять заказ когда невозможно"""
@@ -192,7 +192,9 @@ class TestCourier:
         """Тест успешного завершения заказа"""
         # Arrange
         valid_courier.take_order(small_order)
-        initial_order_status = small_order.status
+
+        small_order.assign(valid_courier.id)
+        initial_order_status = small_order.status  # Теперь ASSIGNED
 
         # Act
         valid_courier.complete_order(small_order)
@@ -204,8 +206,11 @@ class TestCourier:
             for storage in valid_courier.storage_places
         )
         assert order_in_storage is False
-        assert small_order.status == OrderStatus.COMPLETED
-        assert initial_order_status == OrderStatus.ASSIGNED
+        # ⚠️ ИЗМЕНЕНО: статус заказа НЕ должен меняться курьером
+        assert small_order.status == initial_order_status  # Остался ASSIGNED
+
+        # ✅ Проверяем что курьер больше не хранит заказ
+        assert valid_courier.get_assigned_order_id() is None
 
     def test_complete_order_not_found(self, valid_courier, small_order):
         """Тест завершения заказа который не у курьера"""
@@ -218,6 +223,8 @@ class TestCourier:
         # Arrange
         valid_courier.add_storage_place("Багажник", 20)
         valid_courier.take_order(small_order)
+
+        small_order.assign(valid_courier.id)
 
         # Act
         valid_courier.complete_order(small_order)
@@ -374,7 +381,7 @@ class TestCourier:
 
         # Act & Assert - берем первый заказ
         valid_courier.take_order(order1)
-        assert order1.status == OrderStatus.ASSIGNED
+        assert order1.status == OrderStatus.CREATED
         assert any(
             storage.order_id == order1.id for storage in valid_courier.storage_places
         )
@@ -383,8 +390,9 @@ class TestCourier:
         assert valid_courier.can_take_order(order2) is False
 
         # Завершаем первый заказ
+        order1.assign(valid_courier.id)
         valid_courier.complete_order(order1)
-        assert order1.status == OrderStatus.COMPLETED
+        assert order1.status == OrderStatus.ASSIGNED
         assert not any(
             storage.order_id == order1.id for storage in valid_courier.storage_places
         )
@@ -392,12 +400,9 @@ class TestCourier:
         # Теперь можем взять второй
         assert valid_courier.can_take_order(order2) is True
         valid_courier.take_order(order2)
-        assert order2.status == OrderStatus.ASSIGNED
+        # Остался CREATED
+        assert order2.status == OrderStatus.CREATED
         valid_courier.complete_order(order2)
-        assert order2.status == OrderStatus.COMPLETED
-        assert not any(
-            storage.order_id == order2.id for storage in valid_courier.storage_places
-        )
 
     def test_move_algorithm_correctness(self):
         """Тест корректности алгоритма перемещения"""
