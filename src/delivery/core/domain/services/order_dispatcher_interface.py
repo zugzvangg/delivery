@@ -19,10 +19,6 @@ class NoAvailableCouriersError(Exception):
     pass
 
 
-class CourierCanNotTakeOrderErrorDispatcher(Exception):
-    pass
-
-
 class OrderDispatcherInterface(ABC):
     """Domain Service для диспетчеризации заказов"""
 

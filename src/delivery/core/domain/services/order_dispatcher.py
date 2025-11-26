@@ -1,14 +1,16 @@
 # Теперь координация происходит на уровне сервиса:
 from typing import Optional
 
-from src.delivery.core.domain.model.courier.courier import Courier
+from src.delivery.core.domain.model.courier.courier import (
+    Courier,
+    CourierCanNotTakeOrderError,
+)
 from src.delivery.core.domain.model.order.order import NotCreatedOrderStatus, Order
 from src.delivery.core.domain.model.order.order_status import OrderStatus
 from src.delivery.core.domain.services.order_dispatcher_interface import (
     InvalidCourierType,
     InvalidOrderType,
-    CourierCanNotTakeOrderErrorDispatcher,
-    OrderDispatcherInterface
+    OrderDispatcherInterface,
 )
 
 
@@ -17,7 +19,7 @@ class OrderDispatcher(OrderDispatcherInterface):
         self.__validate_order(order)
         self.__validate_courier(courier)
         if not courier.can_take_order(order):
-            raise CourierCanNotTakeOrderErrorDispatcher("Courier cannot take this order")
+            raise CourierCanNotTakeOrderError("Courier cannot take this order")
         courier.take_order(order)
         order.assign(courier.id)
 

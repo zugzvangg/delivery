@@ -73,7 +73,7 @@ class TestOrderDispatcher:
 
         # Act & Assert
         with pytest.raises(
-            CourierCanNotTakeOrderErrorDisp
+            CourierCanNotTakeOrderError
         ):  # CourierCanNotTakeOrderError из take_order
             dispatcher.dispatch(large_order, fast_courier)
 
