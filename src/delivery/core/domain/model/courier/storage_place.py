@@ -1,16 +1,14 @@
 import uuid
 from typing import Optional
 
+from src.delivery.core.domain.model.common import validate_uuid
+
 
 class NotEnoughVolumeError(Exception):
     pass
 
 
 class StorageOccupiedError(Exception):
-    pass
-
-
-class InvalidUUIDError(Exception):
     pass
 
 
@@ -39,14 +37,14 @@ class StoragePlace:
         self.__validate_name(name)
         self.__validate_total_volume(total_volume)
         if id:
-            self.__validate_id(id, "id")
+            validate_uuid(id, "id")
         if order_id:
-            self.__validate_id(order_id, "order_id")
+            validate_uuid(order_id, "order_id")
 
-        self.__id = id if id is not None else uuid.uuid4()
-        self.__name = name
-        self.__total_volume = total_volume
-        self.__order_id = order_id
+        self.__id: uuid.UUID = id if id is not None else uuid.uuid4()
+        self.__name: str = name
+        self.__total_volume: int = total_volume
+        self.__order_id: uuid.uuid4 = order_id
 
     @classmethod
     def create(cls, name: str, total_volume: int) -> "StoragePlace":
@@ -75,12 +73,6 @@ class StoragePlace:
         return self.__order_id
 
     @staticmethod
-    def __validate_id(id: uuid.UUID, var_name: str) -> None:
-        """Может провалидировать и id, и order_id"""
-        if not isinstance(id, uuid.UUID):
-            raise InvalidUUIDError(f"{var_name} if must be of type uuid.UUID")
-
-    @staticmethod
     def __validate_name(name: str) -> None:
         if not isinstance(name, str) or len(name.strip()) == 0:
             raise InvalidStoragePlaceName("Name must be a non-empty string")
@@ -107,7 +99,7 @@ class StoragePlace:
 
     def store(self, order_id: uuid.UUID, volume: int) -> None:
         """Размещение заказа в месте хранения"""
-        self.__validate_id(order_id, "order_id")
+        validate_uuid(order_id, "order_id")
         if not self.can_store(volume):
             raise StorageOccupiedError(
                 "Cannot store order - storage is occupied or volume exceeds capacity"
