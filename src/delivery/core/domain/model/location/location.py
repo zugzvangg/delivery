@@ -13,8 +13,8 @@ class Location:
         self.__MAX_COORD: int = 10
         self._validate_coord(x, "x")
         self._validate_coord(y, "y")
-        self.__x: int = x
-        self.__y: int = y
+        self.__x = x
+        self.__y = y
 
     @property
     def x(self) -> int:

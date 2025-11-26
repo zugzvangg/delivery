@@ -2,10 +2,10 @@ import uuid
 
 import pytest
 
-from src.delivery.core.domain.model.common import InvalidUUIDError
 from src.delivery.core.domain.model.courier.storage_place import (
     InvalidStoragePlaceName,
     InvalidStoragePlaceVolume,
+    InvalidUUIDError,
     StorageOccupiedError,
     StoragePlace,
     StoragePlaceClearWrongOrderId,
