@@ -1,4 +1,3 @@
-# src/delivery/core/domain/ports/courier_repository.py
 import uuid
 from abc import ABC, abstractmethod
 from typing import List, Optional
