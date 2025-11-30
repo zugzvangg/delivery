@@ -262,3 +262,34 @@ class TestStoragePlace:
         assert isinstance(storage.id, uuid.UUID)
         assert isinstance(storage.id, uuid.UUID)
         assert isinstance(storage.id, uuid.UUID)
+
+    def test_location_serialization(self):
+        id = uuid.uuid4()
+        storage_place = StoragePlace("Рюкзак", 50, id)
+        serialized = storage_place.serialize()
+        assert serialized == {
+            "id": str(id),
+            "name": "Рюкзак",
+            "total_volume": 50,
+            "order_id": None,
+        }
+
+        deserialized = StoragePlace.deserialize(serialized)
+        assert deserialized == storage_place
+
+    def test_location_deserialization(self):
+        id = uuid.uuid4()
+        order_id = uuid.uuid4()
+        storage_place = StoragePlace("Рюкзак", 50, id, order_id)
+        deserialized = StoragePlace.deserialize(
+            {
+                "name": "Рюкзак",
+                "total_volume": 50,
+                "id": str(id),
+                "order_id": str(order_id),
+            }
+        )
+        assert deserialized.name == storage_place.name
+        assert deserialized.total_volume == storage_place.total_volume
+        assert deserialized.id == storage_place.id
+        assert deserialized.order_id == storage_place.order_id

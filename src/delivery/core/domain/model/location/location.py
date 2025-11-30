@@ -1,5 +1,6 @@
 import json
 import random
+from typing import Any, Dict, Optional
 
 from src.delivery.core.domain.model.common import WrongSerializationJsonError
 
@@ -58,11 +59,11 @@ class Location:
     def create(cls, x: int, y: int):
         return cls(x=x, y=y)
 
-    def serialize(self) -> dict:
+    def serialize(self) -> Dict[str, Any]:
         return {"x": self.__x, "y": self.__y}
 
     @classmethod
-    def deserialize(cls, data: dict):
+    def deserialize(cls, data: Dict[str, Any]) -> "Location":
         if not isinstance(data, dict):
             raise WrongSerializationJsonError("Should be of dict type")
 
