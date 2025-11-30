@@ -1,4 +1,7 @@
+import json
 import random
+
+from src.delivery.core.domain.model.common import WrongSerializationJsonError
 
 
 class WrongCoordinateError(Exception):
@@ -53,4 +56,19 @@ class Location:
 
     @classmethod
     def create(cls, x: int, y: int):
+        return cls(x=x, y=y)
+
+    def serialize(self) -> dict:
+        return {"x": self.__x, "y": self.__y}
+
+    @classmethod
+    def deserialize(cls, data: dict):
+        if not isinstance(data, dict):
+            raise WrongSerializationJsonError("Should be of dict type")
+
+        x = data.get("x")
+        y = data.get("y")
+        if x is None or y is None:
+            raise WrongSerializationJsonError("Data must contain 'x' and 'y' keys")
+
         return cls(x=x, y=y)
