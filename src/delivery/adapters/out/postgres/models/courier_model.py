@@ -106,4 +106,3 @@ class StoragePlaceModel(Base):
             order_id=self.order_id,
         )
         return storage_place
-        return storage_place

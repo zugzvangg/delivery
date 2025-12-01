@@ -5,7 +5,7 @@ from typing import List, Optional
 from src.delivery.core.domain.model.courier.courier import Courier
 
 
-class CourierRepository(ABC):
+class CourierRepositoryInterface(ABC):
     """Порт для работы с хранилищем курьеров"""
 
     @abstractmethod
