@@ -1,15 +1,17 @@
 import uuid
 from typing import List, Optional
 
-from src.delivery.adapters.out.postgres.database import Database
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.delivery.adapters.out.postgres.models.courier_model import CourierModel
 from src.delivery.core.domain.model.courier.courier import Courier
 from src.delivery.core.ports.courier_repository import CourierRepositoryInterface
-from src.delivery.adapters.out.postgres.models.courier_model import CourierModel
 
 
 class CourierRepository(CourierRepositoryInterface):
-    def __init__(self, database: Database):
-        self._db = database
+    def __init__(self, session: AsyncSession):
+        super().__init__()
+        self.session = session
 
     def add(self, courier: Courier) -> None:
         pass
@@ -34,6 +36,9 @@ class CourierRepository(CourierRepositoryInterface):
         pass
 
     def get_by_id(self, courier_id: uuid.UUID) -> Optional[Courier]:
+        pass
+
+    def get_all_free(self) -> List[Courier]:
         pass
 
     def get_all_free(self) -> List[Courier]:

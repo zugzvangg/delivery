@@ -1,13 +1,11 @@
-version: '3.8'
-
 services:
-    postgres:
+  postgres:
     image: postgres:15-alpine
     platform: linux/arm64/v8
     ports:
       - "5432:5432"
     env_file:
-      - .env
+      - env.example
     environment:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}

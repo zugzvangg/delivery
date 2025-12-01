@@ -2,19 +2,33 @@ import uuid
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
-from src.delivery.adapters.out.postgres.database import Database
+from sqlalchemy import insert, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.delivery.adapters.out.postgres.models.order_model import OrderModel
 from src.delivery.core.domain.model.order.order import Order
 from src.delivery.core.ports.order_repository import OrderRepositoryInterface
 
 
 class OrderRepository(OrderRepositoryInterface):
-    def __init__(self, database: Database):
-        self._db = database
+    def __init__(self, session: AsyncSession):
+        super().__init__()
+        self.session = session
 
-    def add(self, order: Order) -> None:
+    async def add(self, order: Order) -> Order:
         """Добавить заказ"""
-        pass
+        data = {
+            "id": order.id,
+            "location_x": order.location.x,
+            "location_y": order.location.y,
+            "volume": order.volume,
+            "status": order.status.name,
+            "courier_id": order.courier_id,
+        }
+        stmt = insert(OrderModel).values(data).returning(OrderModel)
+        result = await self.session.execute(stmt)
+        order_model = result.unique().scalar_one()
+        return order_model.to_domain_object()
 
     def update(self, order: Order) -> None:
         """Обновить заказ"""

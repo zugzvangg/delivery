@@ -5,7 +5,11 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.8.13"
 dependencies = [
+    "aiosqlite>=0.20.0",
+    "asyncpg>=0.30.0",
     "loguru>=0.7.3",
     "pytest>=8.3.5",
+    "pytest-asyncio>=0.24.0",
     "sqlalchemy>=2.0.44",
+    "testcontainers>=3.7.1",
 ]

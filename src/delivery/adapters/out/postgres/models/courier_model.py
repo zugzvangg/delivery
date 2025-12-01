@@ -5,11 +5,10 @@ from sqlalchemy import UUID as SQLAlchemyUUID
 from sqlalchemy import DateTime, ForeignKey, Integer, String, func
 from sqlalchemy.orm import Mapped, declarative_base, mapped_column, relationship
 
+from src.delivery.adapters.out.postgres.models.base import Base
 from src.delivery.core.domain.model.courier.courier import Courier
 from src.delivery.core.domain.model.courier.storage_place import StoragePlace
 from src.delivery.core.domain.model.location.location import Location
-
-Base = declarative_base()
 
 
 class CourierModel(Base):
@@ -48,9 +47,7 @@ class CourierModel(Base):
         """Модель в доменный объект."""
 
         location = Location(x=self.location_x, y=self.location_y)
-        courier = Courier(
-            name=self.name, speed=self.speed, location=location
-        )
+        courier = Courier(name=self.name, speed=self.speed, location=location)
         return courier
 
 

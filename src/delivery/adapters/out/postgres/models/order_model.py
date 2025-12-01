@@ -5,11 +5,10 @@ from sqlalchemy import UUID as SQLAlchemyUUID
 from sqlalchemy import DateTime, ForeignKey, Integer, String, func
 from sqlalchemy.orm import Mapped, declarative_base, mapped_column
 
+from src.delivery.adapters.out.postgres.models.base import Base
 from src.delivery.core.domain.model.location.location import Location
 from src.delivery.core.domain.model.order.order import Order
 from src.delivery.core.domain.model.order.order_status import OrderStatus
-
-Base = declarative_base()
 
 
 class OrderModel(Base):
