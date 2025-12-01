@@ -121,16 +121,3 @@ class TestLocation:
         with pytest.raises(AttributeError):
             location.y = 7
             location.y = 7
-
-    def test_location_serialization(self):
-        location = Location.create(3, 5)
-        serialized = location.serialize()
-        assert serialized == {"x": 3, "y": 5}
-
-        deserialized = Location.deserialize(serialized)
-        assert deserialized == location
-
-    def test_location_deserialization(self):
-        location = Location(3, 5)
-        deserialized = Location.deserialize({"x": 3, "y": 5})
-        assert deserialized == location

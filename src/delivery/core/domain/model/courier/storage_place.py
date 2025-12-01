@@ -1,10 +1,7 @@
 import uuid
 from typing import Any, Dict, Optional
 
-from src.delivery.core.domain.model.common import (
-    WrongSerializationJsonError,
-    validate_uuid,
-)
+from src.delivery.core.domain.model.common import validate_uuid
 
 
 class NotEnoughVolumeError(Exception):
@@ -127,45 +124,3 @@ class StoragePlace:
     def is_empty(self) -> bool:
         """Публичное свойство для проверки пустоты"""
         return not self.__is_occupied()
-
-    def serialize(self) -> Dict[str, Any]:
-        """Сериализовать StoragePlace в словарь для хранения в БД"""
-        return {
-            "id": str(self.__id),
-            "name": self.__name,
-            "total_volume": self.__total_volume,
-            "order_id": str(self.__order_id) if self.__order_id else None,
-        }
-
-    @classmethod
-    def deserialize(cls, data: Dict[str, Any]) -> "StoragePlace":
-        """Десериализовать StoragePlace из словаря"""
-        if not isinstance(data, dict):
-            raise WrongSerializationJsonError("Should be of dict type")
-
-        name = data.get("name")
-        total_volume = data.get("total_volume")
-
-        if name is None or total_volume is None:
-            raise WrongSerializationJsonError(
-                "Data must contain 'name' and 'total_volume' keys"
-            )
-
-        # Обрабатываем опциональные поля
-        storage_id = None
-        if data.get("id"):
-            try:
-                storage_id = uuid.UUID(data["id"])
-            except (ValueError, TypeError):
-                raise WrongSerializationJsonError("Invalid UUID format for 'id'")
-
-        order_id = None
-        if data.get("order_id"):
-            try:
-                order_id = uuid.UUID(data["order_id"])
-            except (ValueError, TypeError):
-                raise WrongSerializationJsonError("Invalid UUID format for 'order_id'")
-
-        return cls(
-            name=name, total_volume=total_volume, id=storage_id, order_id=order_id
-        )
