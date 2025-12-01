@@ -7,4 +7,5 @@ requires-python = ">=3.8.13"
 dependencies = [
     "loguru>=0.7.3",
     "pytest>=8.3.5",
+    "sqlalchemy>=2.0.44",
 ]
