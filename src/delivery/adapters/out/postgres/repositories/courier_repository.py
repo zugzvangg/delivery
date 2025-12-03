@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.delivery.adapters.out.postgres.models.courier_model import CourierModel
+from src.delivery.adapters.out.postgres.models.models import CourierModel
 from src.delivery.core.domain.model.courier.courier import Courier
 from src.delivery.core.ports.courier_repository import CourierRepositoryInterface
 

@@ -5,7 +5,7 @@ from typing import List, Optional
 from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.delivery.adapters.out.postgres.models.order_model import OrderModel
+from src.delivery.adapters.out.postgres.models.models import OrderModel
 from src.delivery.core.domain.model.order.order import Order
 from src.delivery.core.ports.order_repository import OrderRepositoryInterface
 

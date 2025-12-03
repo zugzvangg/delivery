@@ -4,7 +4,7 @@ from datetime import datetime
 
 import pytest
 
-from src.delivery.adapters.out.postgres.models.order_model import OrderModel
+from src.delivery.adapters.out.postgres.models.models import OrderModel
 from src.delivery.core.domain.model.location.location import Location
 from src.delivery.core.domain.model.order.order import Order
 from src.delivery.core.domain.model.order.order_status import OrderStatus
