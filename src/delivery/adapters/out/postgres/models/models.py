@@ -51,8 +51,7 @@ class CourierModel(Base):
 
         # Прикладываем storage_places
         model.storage_places = [
-            StoragePlaceModel.from_domain_object(sp, courier_id=courier.id)
-            for sp in courier.storage_places
+            StoragePlaceModel.from_domain_object(sp) for sp in courier.storage_places
         ]
 
         return model
@@ -106,16 +105,14 @@ class StoragePlaceModel(Base):
 
     # domain → ORM
     @classmethod
-    def from_domain_object(
-        cls, storage_place: StoragePlace, courier_id: UUID
-    ) -> "StoragePlaceModel":
+    def from_domain_object(cls, storage_place: StoragePlace) -> "StoragePlaceModel":
 
         return StoragePlaceModel(
             id=storage_place.id,
             name=storage_place.name,
             total_volume=storage_place.total_volume,
             order_id=storage_place.order_id,
-            courier_id=courier_id,
+            courier_id=storage_place.courier_id,
         )
 
     # ORM → domain
@@ -125,6 +122,7 @@ class StoragePlaceModel(Base):
             total_volume=self.total_volume,
             id=self.id,
             order_id=self.order_id,
+            courier_id=self.courier_id,
         )
         return sp
 
@@ -175,7 +173,7 @@ class OrderModel(Base):
         status = OrderStatus(self.status)
         if status == OrderStatus.CREATED:
             return order
-        
+
         if status == OrderStatus.ASSIGNED:
             order.assign(self.courier_id)
             return order

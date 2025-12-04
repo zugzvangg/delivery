@@ -4,7 +4,7 @@ from datetime import datetime
 
 import pytest
 
-from src.delivery.adapters.out.postgres.models.courier_model import (
+from src.delivery.adapters.out.postgres.models.models import (
     CourierModel,
     StoragePlaceModel,
 )
@@ -158,9 +158,14 @@ class TestStoragePlaceModelMappers:
         # Arrange
         storage_id = uuid.uuid4()
         order_id = uuid.uuid4()
+        courier_id = uuid.uuid4()
 
         domain_storage = StoragePlace(
-            name="Рюкзак", total_volume=15, id=storage_id, order_id=order_id
+            name="Рюкзак",
+            total_volume=15,
+            id=storage_id,
+            order_id=order_id,
+            courier_id=courier_id,
         )
 
         # Act
@@ -171,11 +176,15 @@ class TestStoragePlaceModelMappers:
         assert storage_model.name == "Рюкзак"
         assert storage_model.total_volume == 15
         assert storage_model.order_id == order_id
+        assert storage_model.courier_id == courier_id
 
     def test_from_domain_object_without_order(self):
         """Тест: from_domain_object для свободного места хранения"""
         # Arrange
-        domain_storage = StoragePlace.create(name="Сумка", total_volume=10)
+        courier_id = uuid.uuid4()
+        domain_storage = StoragePlace.create(
+            name="Сумка", total_volume=10, courier_id=courier_id
+        )
 
         # Act
         storage_model = StoragePlaceModel.from_domain_object(domain_storage)
@@ -185,18 +194,21 @@ class TestStoragePlaceModelMappers:
         assert storage_model.name == "Сумка"
         assert storage_model.total_volume == 10
         assert storage_model.order_id is None
+        assert storage_model.courier_id == courier_id
 
     def test_to_domain_object_restores_all_fields(self):
         """Тест: to_domain_object восстанавливает все поля места хранения"""
         # Arrange
         storage_id = uuid.uuid4()
         order_id = uuid.uuid4()
+        courier_id = uuid.uuid4()
 
         storage_model = StoragePlaceModel(
             id=storage_id,
             name="Багажник",
             total_volume=25,
             order_id=order_id,
+            courier_id=courier_id,
             created_at=datetime.utcnow(),
             updated_at=datetime.utcnow(),
         )
@@ -209,15 +221,18 @@ class TestStoragePlaceModelMappers:
         assert domain_storage.name == "Багажник"
         assert domain_storage.total_volume == 25
         assert domain_storage.order_id == order_id
+        assert domain_storage.courier_id == courier_id
 
     def test_to_domain_object_without_order(self):
         """Тест: to_domain_object для свободного места хранения"""
         # Arrange
+        courier_id = uuid.uuid4()
         storage_model = StoragePlaceModel(
             id=uuid.uuid4(),
             name="Коробка",
             total_volume=8,
             order_id=None,
+            courier_id=courier_id,
             created_at=datetime.utcnow(),
             updated_at=datetime.utcnow(),
         )
@@ -230,15 +245,18 @@ class TestStoragePlaceModelMappers:
         assert domain_storage.total_volume == 8
         assert domain_storage.order_id is None
         assert domain_storage.is_empty is True
+        assert domain_storage.courier_id == courier_id
 
     def test_round_trip_conversion_preserves_storage_data(self):
         """Тест: полный цикл Domain -> Model -> Domain сохраняет данные места хранения"""
         # Arrange
+        courier_id = uuid.uuid4()
         original_storage = StoragePlace(
             name="Оригинальное место",
             total_volume=20,
             id=uuid.uuid4(),
             order_id=uuid.uuid4(),
+            courier_id=uuid.uuid4(),
         )
 
         # Act
@@ -253,12 +271,18 @@ class TestStoragePlaceModelMappers:
         assert restored_storage.name == "Оригинальное место"
         assert restored_storage.total_volume == 20
         assert restored_storage.order_id == original_storage.order_id
+        assert restored_storage.courier_id == original_storage.courier_id
 
     def test_to_domain_object_creates_valid_storage_place(self):
         """Тест: to_domain_object создает корректный StoragePlace"""
         # Arrange
+        courier_id = uuid.uuid4()
         storage_model = StoragePlaceModel(
-            id=uuid.uuid4(), name="Тестовое место", total_volume=12, order_id=None
+            id=uuid.uuid4(),
+            name="Тестовое место",
+            total_volume=12,
+            order_id=None,
+            courier_id=courier_id,
         )
 
         # Act
@@ -269,13 +293,19 @@ class TestStoragePlaceModelMappers:
         assert domain_storage.can_store(10) is True
         assert domain_storage.can_store(15) is False  # Больше объема
         assert domain_storage.is_empty is True
+        assert domain_storage.courier_id == courier_id
 
     def test_storage_place_with_order_is_occupied(self):
         """Тест: место хранения с заказом считается занятым"""
         # Arrange
         order_id = uuid.uuid4()
+        courier_id = uuid.uuid4()
         storage_model = StoragePlaceModel(
-            id=uuid.uuid4(), name="Занятое место", total_volume=10, order_id=order_id
+            id=uuid.uuid4(),
+            name="Занятое место",
+            total_volume=10,
+            order_id=order_id,
+            courier_id=courier_id,
         )
 
         # Act
@@ -285,17 +315,20 @@ class TestStoragePlaceModelMappers:
         assert domain_storage.is_empty is False
         assert domain_storage.order_id == order_id
         assert domain_storage.can_store(5) is False  # Занято, нельзя хранить
+        assert domain_storage.courier_id == courier_id
 
     def test_from_domain_object_does_not_modify_original_storage(self):
         """Тест: from_domain_object не изменяет исходное место хранения"""
         # Arrange
-        original_storage = StoragePlace.create("Оригинал", 15)
+        courier_id = uuid.uuid4()
+        original_storage = StoragePlace.create("Оригинал", 15, courier_id)
 
         # Запоминаем исходное состояние
         original_id = original_storage.id
         original_name = original_storage.name
         original_volume = original_storage.total_volume
         original_order_id = original_storage.order_id
+        original_courier_id = original_storage.courier_id
 
         # Act
         storage_model = StoragePlaceModel.from_domain_object(original_storage)
@@ -305,12 +338,14 @@ class TestStoragePlaceModelMappers:
         assert original_storage.name == original_name
         assert original_storage.total_volume == original_volume
         assert original_storage.order_id == original_order_id
+        assert original_storage.courier_id == original_courier_id
 
         # Модель создана корректно
         assert storage_model.id == original_id
         assert storage_model.name == original_name
         assert storage_model.total_volume == original_volume
         assert storage_model.order_id == original_order_id
+        assert storage_model.courier_id == original_courier_id
 
 
 class TestIntegratedMappers:

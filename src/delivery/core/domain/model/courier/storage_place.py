@@ -31,11 +31,13 @@ class StoragePlace:
         self,
         name: str,
         total_volume: int,
+        courier_id: uuid.UUID,
         id: Optional[uuid.UUID] = None,
         order_id: Optional[uuid.UUID] = None,
     ):
         self.__validate_name(name)
         self.__validate_total_volume(total_volume)
+        validate_uuid(courier_id, "courier_id")
         if id:
             validate_uuid(id, "id")
         if order_id:
@@ -43,13 +45,16 @@ class StoragePlace:
 
         self.__id: uuid.UUID = id if id is not None else uuid.uuid4()
         self.__name: str = name
+        self.__courier_id = courier_id
         self.__total_volume: int = total_volume
         self.__order_id: uuid.uuid4 = order_id
 
     @classmethod
-    def create(cls, name: str, total_volume: int) -> "StoragePlace":
+    def create(
+        cls, name: str, total_volume: int, courier_id: uuid.UUID
+    ) -> "StoragePlace":
         """Фабричный метод для создания места хранения"""
-        return cls(name=name, total_volume=total_volume)
+        return cls(name=name, total_volume=total_volume, courier_id=courier_id)
 
     # Геттеры для доступа к приватным полям
     @property
@@ -71,6 +76,11 @@ class StoragePlace:
     def order_id(self) -> Optional[uuid.UUID]:
         """Идентификатор заказа, который хранится в месте хранения"""
         return self.__order_id
+    
+    @property
+    def courier_id(self) -> Optional[uuid.UUID]:
+        """Идентификатор курьера, которому принадлежит место хранения"""
+        return self.__courier_id
 
     @staticmethod
     def __validate_name(name: str) -> None:

@@ -42,7 +42,7 @@ class Courier:
         self.__speed: int = speed
         self.__location: Location = location
         self.__storage_places: list[StoragePlace] = [
-            StoragePlace(name="Сумка", total_volume=10)
+            StoragePlace(name="Сумка", total_volume=10, courier_id=self.__id)
         ]
 
     @staticmethod
@@ -64,7 +64,7 @@ class Courier:
 
     def add_storage_place(self, name: str, volume: int) -> None:
         """Добавить место хранения"""
-        storage_place = StoragePlace(name=name, total_volume=volume)
+        storage_place = StoragePlace(name=name, total_volume=volume, courier_id=self.__id)
         self.__storage_places.append(storage_place)
 
     def can_take_order(self, order: Order) -> bool:
