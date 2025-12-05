@@ -347,6 +347,32 @@ class TestStoragePlaceModelMappers:
         assert storage_model.order_id == original_order_id
         assert storage_model.courier_id == original_courier_id
 
+    def test_courier_from_persistence(self):
+        courier_id = uuid.uuid4()
+        storage_place = StoragePlace(
+            id=uuid.uuid4(),
+            name="Место курьера",
+            total_volume=10,
+            order_id=None,
+            courier_id=uuid.uuid4(),
+        )
+        location = Location(x=5, y=5)
+        restored = Courier._from_persistence(
+            id=courier_id,
+            name="John",
+            speed=10,
+            location=location,
+            storage_places=[storage_place],
+        )
+
+        assert restored.id == courier_id
+        assert restored.name == "John"
+        assert restored.speed == 10
+        assert restored.location == location
+        # не создается дефолтное место
+        assert len(restored.storage_places) == 1
+        assert restored.storage_places[0] == storage_place
+
 
 class TestIntegratedMappers:
     """Интегрированные тесты для связи курьер-места хранения"""

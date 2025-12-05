@@ -76,7 +76,7 @@ class StoragePlace:
     def order_id(self) -> Optional[uuid.UUID]:
         """Идентификатор заказа, который хранится в месте хранения"""
         return self.__order_id
-    
+
     @property
     def courier_id(self) -> Optional[uuid.UUID]:
         """Идентификатор курьера, которому принадлежит место хранения"""
@@ -134,3 +134,25 @@ class StoragePlace:
     def is_empty(self) -> bool:
         """Публичное свойство для проверки пустоты"""
         return not self.__is_occupied()
+
+    @classmethod
+    def _from_persistence(
+        cls,
+        id: uuid.UUID,
+        name: str,
+        total_volume: int,
+        courier_id: uuid.UUID,
+        order_id: Optional[uuid.UUID],
+    ) -> "StoragePlace":
+        """
+        Полное восстановление StoragePlace.
+        """
+        self = cls.__new__(cls)
+
+        self.__id = id
+        self.__name = name
+        self.__total_volume = total_volume
+        self.__order_id = order_id
+        self.__courier_id = courier_id
+
+        return self

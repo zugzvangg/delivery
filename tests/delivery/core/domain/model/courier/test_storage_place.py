@@ -298,3 +298,24 @@ class TestStoragePlace:
         assert storage.courier_id == courier_id
         assert isinstance(storage.id, uuid.UUID)
         assert isinstance(storage.courier_id, uuid.UUID)
+
+    def test_storage_place_from_persistence(self):
+        sp_id = uuid.uuid4()
+        courier_id = uuid.uuid4()
+        order_id = uuid.uuid4()
+
+        restored = StoragePlace._from_persistence(
+            id=sp_id,
+            name="Сумка",
+            total_volume=15,
+            courier_id=courier_id,
+            order_id=order_id,
+        )
+
+        assert restored.id == sp_id
+        assert restored.total_volume == 15
+        assert restored.name == "Сумка"
+        assert restored.courier_id == courier_id
+        assert restored.order_id == order_id
+
+

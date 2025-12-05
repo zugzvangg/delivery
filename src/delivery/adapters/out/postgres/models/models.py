@@ -56,27 +56,19 @@ class CourierModel(Base):
 
         return model
 
+    # ORM → domain
     def to_domain_object(self) -> Courier:
         location = Location(self.location_x, self.location_y)
 
-        courier = Courier(
+        storage_places = [sp.to_domain_object() for sp in self.storage_places]
+
+        return Courier._from_persistence(
+            id=self.id,
             name=self.name,
             speed=self.speed,
             location=location,
+            storage_places=storage_places,
         )
-
-        # восстанавливаем id (перезаписываем приватное поле)
-        # тут точно только так, так как по доменной модели у курьера всегда генерируется id
-        courier._Courier__id = self.id
-
-        # восстанавливаем storage_places
-        # Но если не так, то как лучше сделать?
-        # Через add_storage_place в цикле нельзя, так как там уже лежит объект
-        courier._Courier__storage_places = [
-            sp.to_domain_object() for sp in self.storage_places
-        ]
-
-        return courier
 
 
 class StoragePlaceModel(Base):
@@ -115,16 +107,14 @@ class StoragePlaceModel(Base):
             courier_id=storage_place.courier_id,
         )
 
-    # ORM → domain
     def to_domain_object(self) -> StoragePlace:
-        sp = StoragePlace(
+        return StoragePlace._from_persistence(
+            id=self.id,
             name=self.name,
             total_volume=self.total_volume,
-            id=self.id,
-            order_id=self.order_id,
             courier_id=self.courier_id,
+            order_id=self.order_id,
         )
-        return sp
 
 
 class OrderModel(Base):
@@ -168,17 +158,12 @@ class OrderModel(Base):
 
     # ORM → domain
     def to_domain_object(self) -> Order:
-        location = Location(self.location_x, self.location_y)
-        order = Order(id=self.id, location=location, volume=self.volume)
-        status = OrderStatus(self.status)
-        if status == OrderStatus.CREATED:
-            return order
-
-        if status == OrderStatus.ASSIGNED:
-            order.assign(self.courier_id)
-            return order
-
-        if status == OrderStatus.COMPLETED:
-            order.assign(self.courier_id)
-            order.complete()
-            return order
+        status_enum = OrderStatus(self.status)
+        order = Order._from_persistence(
+            id=self.id,
+            location=Location(x=self.location_x, y=self.location_y),
+            volume=self.volume,
+            status=status_enum,
+            courier_id=self.courier_id,
+        )
+        return order

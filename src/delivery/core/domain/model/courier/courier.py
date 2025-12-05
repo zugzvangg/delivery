@@ -162,3 +162,26 @@ class Courier:
     @classmethod
     def create(cls, name: str, speed: int, location: Location):
         return cls(name=name, speed=speed, location=location)
+    
+    @classmethod
+    def _from_persistence(
+        cls,
+        id: uuid.UUID,
+        name: str,
+        speed: int,
+        location: Location,
+        storage_places: list[StoragePlace],
+    ) -> "Courier":
+        """
+        Восстановление Courier из persistence слоя.
+        Пропускает все проверки и бизнес-инварианты.
+        """
+        self = cls.__new__(cls)
+
+        self.__id = id
+        self.__name = name
+        self.__speed = speed
+        self.__location = location
+        self.__storage_places = storage_places
+
+        return self
