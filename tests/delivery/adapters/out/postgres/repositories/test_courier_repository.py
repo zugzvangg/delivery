@@ -29,26 +29,24 @@ async def test_storage_place_model_integration(db):
 
     courier_model = CourierModel.from_domain_object(courier)
     db.add(courier_model)
-    await db.flush()
+    db.flush()
 
     # создаём storage_place в домене
     sp_domain = StoragePlace(
-        name="Рюкзак", total_volume=20, id=uuid.uuid4(), occupied_volume=5
+        name="Рюкзак", total_volume=10, courier_id=courier.id
     )
 
     # создаём ORM модель
-    sp_model = StoragePlaceModel.from_domain_object(sp_domain, courier_id=courier.id)
+    sp_model = StoragePlaceModel.from_domain_object(sp_domain)
     db.add(sp_model)
-    await db.commit()
+    db.commit()
 
     # --- Act ---
-    loaded_sp: StoragePlaceModel = await db.get(StoragePlaceModel, sp_domain.id)
+    loaded_sp: StoragePlaceModel = db.get(StoragePlaceModel, sp_domain.id)
     restored_domain_sp = loaded_sp.to_domain_object()
 
     # --- Assert ---
     assert restored_domain_sp.id == sp_domain.id
     assert restored_domain_sp.name == "Рюкзак"
-    assert restored_domain_sp.total_volume == 20  # --- Assert ---
-    assert restored_domain_sp.id == sp_domain.id
-    assert restored_domain_sp.name == "Рюкзак"
-    assert restored_domain_sp.total_volume == 20
+    assert restored_domain_sp.total_volume == 10  # --- Assert ---
+
