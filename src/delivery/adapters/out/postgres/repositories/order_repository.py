@@ -14,15 +14,33 @@ class OrderRepository(OrderRepositoryInterface):
 
     def add(self, order: Order) -> Order:
         """Добавить заказ в БД и вернуть доменный объект"""
+        if not isinstance(order, Order):
+            raise ValueError("'order' should be the domain model Order")
         orm_order = OrderModel.from_domain_object(order)
         self.session.add(orm_order)
         self.session.commit()
         self.session.refresh(orm_order)  # подгружаем все поля после commit
         return orm_order.to_domain_object()
 
-    def update(self, order: Order) -> None:
-        """Обновить заказ"""
-        pass
+    def update(self, order: Order) -> Order:
+        """Обновить существующий заказ"""
+
+        db_order: OrderModel = self.session.get(OrderModel, order.id)
+        if db_order is None:
+            raise ValueError(f"Order {order.id} not found")
+
+        # Обновляем поля
+        db_order.location_x = order.location.x
+        db_order.location_y = order.location.y
+        db_order.volume = order.volume
+        db_order.status = order.status.name
+        db_order.courier_id = order.courier_id
+
+        self.session.commit()
+        self.session.refresh(db_order)
+
+        return db_order.to_domain_object()
+    
 
     def get_by_id(self, order_id: uuid.UUID) -> Optional[Order]:
         """Получить заказ по идентификатору"""

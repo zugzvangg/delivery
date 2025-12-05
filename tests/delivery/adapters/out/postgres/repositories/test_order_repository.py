@@ -38,4 +38,38 @@ class TestOrderRepository:
         assert db_order.location_x == 1
         assert db_order.location_y == 2
         assert db_order.id == order_id
-        
+
+    def test_update_order(self, db):
+        repo = OrderRepository(db)
+        order_id = uuid.uuid4()
+        # --- Arrange ---
+        order = Order(
+            id=order_id,
+            location=Location(5, 5),
+            volume=10,
+        )
+
+        # Добавляем в БД
+        repo.add(order)
+
+        # Меняем данные
+        courier_id = uuid.uuid4()
+        order.assign(courier_id=courier_id)
+        assert order.courier_id == courier_id
+        assert order.status == OrderStatus.ASSIGNED
+
+        # --- Act ---
+        updated = repo.update(order)
+
+        # --- Assert ---
+        assert updated.id == order.id
+        assert updated.courier_id == courier_id
+        assert updated.status == OrderStatus.ASSIGNED
+
+        # Проверяем через БД
+        db_order = db.get(OrderModel, order.id)
+        assert db_order.location_x == 5
+        assert db_order.location_y == 5
+        assert db_order.volume == 10
+        assert db_order.status == "ASSIGNED"
+        assert db_order.courier_id == courier_id

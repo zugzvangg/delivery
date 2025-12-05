@@ -1,7 +1,7 @@
 import uuid
 from typing import List, Optional
 
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 
 from src.delivery.adapters.out.postgres.models.models import CourierModel
 from src.delivery.core.domain.model.courier.courier import Courier
@@ -9,28 +9,19 @@ from src.delivery.core.ports.courier_repository import CourierRepositoryInterfac
 
 
 class CourierRepository(CourierRepositoryInterface):
-    def __init__(self, session: AsyncSession):
-        super().__init__()
+    def __init__(self, session: Session):
         self.session = session
 
-    def add(self, courier: Courier) -> None:
-        pass
-        # courier_data, storage_data = CourierMapper.to_db(courier)
-
-        # cursor = self._db.get_cursor()
-
-        # # Добавляем курьера
-        # cursor.execute("""
-        #     INSERT INTO couriers (id, name, speed, location_x, location_y)
-        #     VALUES (:id, :name, :speed, :location_x, :location_y)
-        # """, courier_data)
-
-        # # Добавляем места хранения
-        # for storage in storage_data:
-        #     cursor.execute("""
-        #         INSERT INTO storage_places (id, courier_id, name, total_volume, order_id)
-        #         VALUES (:id, :courier_id, :name, :total_volume, :order_id)
-        #     """, storage)
+    def add(self, courier: Courier) -> Courier:
+        """Добавить курьера в БД и вернуть доменный объект"""
+        if not isinstance(courier, Courier):
+            raise ValueError("'courier' should be the domain model Order")
+        orm_order = CourierModel.from_domain_object(courier)
+        self.session.add(orm_order)
+        self.session.commit()
+        self.session.refresh(orm_order)  # подгружаем все поля после commit
+        return orm_order.to_domain_object()
+        
 
     def update(self, courier: Courier) -> None:
         pass
@@ -42,4 +33,6 @@ class CourierRepository(CourierRepositoryInterface):
         pass
 
     def get_all_free(self) -> List[Courier]:
+        pass
+        pass
         pass
