@@ -19,6 +19,7 @@ dependencies = [
     "grpclib[protobuf]>=0.4.8,<0.5.0",
     "faststream[kafka]>=0.5.44,<0.6.0",
     "python-json-logger>=3.3.0,<4.0.0",
+    "pytest-asyncio>=0.23.8",
 ]
 
 [project.optional-dependencies]
