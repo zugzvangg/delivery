@@ -70,7 +70,7 @@ class OrderRepository(OrderRepositoryInterface):
         all_assigned_orders = select(OrderModel).where(
             OrderModel.status == OrderStatus.ASSIGNED.value
         )
-
-        if not all_assigned_orders:
+        orm_order = self.session.execute(all_assigned_orders).scalars()
+        if orm_order is None:
             raise ValueError("No 'assigned' orders")
-        return [x.to_domain_model() for x in all_assigned_orders]
+        return [x.to_domain_model() for x in orm_order]
