@@ -29,7 +29,7 @@ class OrderRepository(OrderRepositoryInterface):
 
         db_order: OrderModel = self.session.get(OrderModel, order.id)
         if db_order is None:
-            raise ValueError(f"Order {order.id} not found")
+            raise ValueError(f"Order {order.id=} not found")
 
         # Обновляем поля
         db_order.location_x = order.location.x

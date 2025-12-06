@@ -1,5 +1,7 @@
 import uuid
+
 import pytest
+
 from src.delivery.adapters.out.postgres.models.models import (
     CourierModel,
     StoragePlaceModel,
@@ -55,6 +57,29 @@ class TestCourierRepository:
         # изначально задаваемый
         assert db_sp_list[0].name == "Сумка"
         assert db_sp_list[0].total_volume == 10
+
+    def test_update_courier(self, db):
+        repo = CourierRepository(db)
+
+        courier = Courier(
+            name="Иван",
+            speed=12,
+            location=Location(3, 4),
+        )
+        # вперва просто добавляем курьера в базу
+        repo.add(courier)
+        # добавляем ему место хранения
+        courier.add_storage_place(name="Рюкзак", volume=20)
+        # обновляем его в базе, должно появиться 2 места, а остальное не измениться
+        repo.update(courier)
+
+        updated_courier = repo.get_by_id(courier.id)
+        updated_storage_places = updated_courier.storage_places
+        assert len(updated_storage_places) == 2
+        assert updated_storage_places[0].name == "Сумка"
+        assert updated_storage_places[1].name == "Рюкзак"
+        assert updated_storage_places[1].total_volume == 20
+
 
     def test_get_by_id(self, db):
         courier_repo = CourierRepository(db)

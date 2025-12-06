@@ -30,7 +30,20 @@ class CourierRepository(CourierRepositoryInterface):
         return orm_courier.to_domain_object()
 
     def update(self, courier: Courier) -> None:
-        pass
+        """Обновить существующего курьера"""
+        db_courier: CourierModel = self.session.get(CourierModel, courier.id)
+        if db_courier is None:
+            raise ValueError(f"Courier {courier.id=} not found")
+        db_courier.name = courier.name
+        db_courier.speed = courier.speed
+        db_courier.location_x = courier.location.x
+        db_courier.location_y = courier.location.y
+        db_courier.storage_places = [
+            StoragePlaceModel.from_domain_object(x) for x in courier.storage_places
+        ]
+        self.session.commit()
+        self.session.refresh(db_courier)
+        return db_courier.to_domain_object()
 
     def get_by_id(self, courier_id: uuid.UUID) -> Optional[Courier]:
         """Получить курьера по идентификатору"""
