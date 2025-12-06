@@ -1,10 +1,11 @@
 import uuid
 
+import pytest
+
 from src.delivery.adapters.out.postgres.models.models import OrderModel
 from src.delivery.adapters.out.postgres.repositories.courier_repository import (
     CourierRepository,
 )
-import pytest
 from src.delivery.adapters.out.postgres.repositories.order_repository import (
     OrderRepository,
 )
@@ -117,4 +118,107 @@ class TestOrderRepository:
         with pytest.raises(ValueError):
             order_repo.get_any_created()
 
+    def test_all_workaround(self, db):
+        order_repo = OrderRepository(db)
+        courier_repo = CourierRepository(db)
 
+        courier1 = Courier(
+            name="Иван",
+            speed=12,
+            location=Location(3, 4),
+        )
+
+        courier2 = Courier(
+            name="Петр",
+            speed=20,
+            location=Location(5, 8),
+        )
+        courier3 = Courier(
+            name="Вася",
+            speed=15,
+            location=Location(2, 6),
+        )
+        courier_repo.add(courier1)
+        courier_repo.add(courier2)
+        courier_repo.add(courier3)
+        # добавляем курьеров
+
+        order_id1 = uuid.uuid4()
+        order_id2 = uuid.uuid4()
+        order_id3 = uuid.uuid4()
+
+        order1 = Order(
+            id=order_id1,
+            location=Location(6, 6),
+            volume=5,
+        )
+        order2 = Order(
+            id=order_id2,
+            location=Location(7, 7),
+            volume=20,
+        )
+        order3 = Order(
+            id=order_id3,
+            location=Location(9, 9),
+            volume=10,
+        )
+        # добавляем заказы
+        order_repo.add(order1)
+        order_repo.add(order2)
+        order_repo.add(order3)
+
+        # добавляем двум курьерам по месту хранения и апдейтим их
+        courier1.add_storage_place(name="Рюкзак", volume=50)
+        courier2.add_storage_place(name="Мешок", volume=30)
+        # апдейтим их
+        courier_repo.update(courier1)
+        courier_repo.update(courier2)
+
+        # должно быть 3 свободных курьера
+        free_couriers = courier_repo.get_all_free()
+        assert len(free_couriers) == 3
+
+        # ассайним и обновляем заказы и курьеров
+        courier1.take_order(order1)
+        order1.assign(courier1.id)
+        courier_repo.update(courier1)
+        order_repo.update(order1)
+
+        courier2.take_order(order2)
+        order2.assign(courier2.id)
+        courier_repo.update(courier2)
+        order_repo.update(order2)
+
+        # order3 должен остаться свободным
+        created_order = order_repo.get_any_created()
+        assert created_order.volume == 10  # как у order3
+        assert created_order.location == Location(9, 9)  # как у order3
+
+        # order2 и order3 должны быть assigned
+        all_assigned_orders = order_repo.get_all_assigned()
+        assert len(all_assigned_orders) == 2
+        assert all_assigned_orders[0].courier_id is not None
+        assert all_assigned_orders[0].status == OrderStatus.ASSIGNED
+        assert all_assigned_orders[1].courier_id is not None
+        assert all_assigned_orders[1].status == OrderStatus.ASSIGNED
+
+        # получаем одного свободного курьера
+        all_free_couriers = courier_repo.get_all_free()
+        assert len(all_free_couriers) == 1
+        assert all_free_couriers[0].id == courier3.id
+        assert all_free_couriers[0].name == "Вася"
+
+        # и смотрим, что заказы завершаются
+        courier2.complete_order(order2)
+        order2.complete()
+        courier_repo.update(courier2)
+        order_repo.update(order2)
+
+        # и смотрим, что курьер свободен, а заказ завершен
+        courier_who_completed = courier_repo.get_by_id(courier2.id)
+        completed_order = order_repo.get_by_id(order2.id)
+        assert (
+            courier_who_completed.storage_places[0].order_id is None
+            and courier_who_completed.storage_places[1].order_id is None
+        )
+        assert completed_order.status == OrderStatus.COMPLETED

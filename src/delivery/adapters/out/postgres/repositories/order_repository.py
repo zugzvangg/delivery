@@ -73,4 +73,4 @@ class OrderRepository(OrderRepositoryInterface):
         orm_order = self.session.execute(all_assigned_orders).scalars()
         if orm_order is None:
             raise ValueError("No 'assigned' orders")
-        return [x.to_domain_model() for x in orm_order]
+        return [x.to_domain_object() for x in orm_order]

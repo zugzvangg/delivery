@@ -144,3 +144,5 @@ class TestCourierRepository:
         assert len(free_couriers) == 2
         assert free_couriers[0].name == "Петр"
         assert free_couriers[1].name == "Вася"
+
+    
