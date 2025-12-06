@@ -40,11 +40,15 @@ class OrderRepository(OrderRepositoryInterface):
         self.session.refresh(db_order)
 
         return db_order.to_domain_object()
-    
 
     def get_by_id(self, order_id: uuid.UUID) -> Optional[Order]:
         """Получить заказ по идентификатору"""
-        pass
+        if not isinstance(order_id, uuid.UUID):
+            raise ValueError("'order_id' should be of uuid.UUID type")
+        db_order: OrderModel = self.session.get(OrderModel, order_id)
+        if db_order is None:
+            raise ValueError(f"Order {order_id} not found")
+        return db_order.to_domain_object()
 
     def get_any_created(self) -> Optional[Order]:
         """Получить 1 любой заказ со статусом 'Created'"""
@@ -53,6 +57,4 @@ class OrderRepository(OrderRepositoryInterface):
     def get_all_assigned(self) -> List[Order]:
         """Получить все назначенные заказы (со статусом 'Assigned')"""
         pass
-        """Получить все назначенные заказы (со статусом 'Assigned')"""
-        pass
-        pass
+

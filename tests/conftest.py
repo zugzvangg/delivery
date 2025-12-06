@@ -25,8 +25,9 @@ def engine(postgres_container):
     Base.metadata.create_all(engine)
 
     yield engine
-
+    # Base.metadata.clear_all()
     engine.dispose()
+
 
 
 @pytest.fixture()
@@ -40,3 +41,12 @@ def db(engine):
     finally:
         session.rollback()
         session.close()
+        
+    # вычищаем таблицы
+    with engine.connect() as conn:
+        # Важно удалять сначала дочерние таблицы (FK) → reversed
+        for table in reversed(Base.metadata.sorted_tables):
+            conn.execute(table.delete())
+            pass
+        conn.commit()
+
