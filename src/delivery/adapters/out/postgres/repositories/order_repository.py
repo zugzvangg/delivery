@@ -1,10 +1,12 @@
 import uuid
 from typing import List, Optional
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from src.delivery.adapters.out.postgres.models.models import OrderModel
 from src.delivery.core.domain.model.order.order import Order
+from src.delivery.core.domain.model.order.order_status import OrderStatus
 from src.delivery.core.ports.order_repository import OrderRepositoryInterface
 
 
@@ -52,9 +54,23 @@ class OrderRepository(OrderRepositoryInterface):
 
     def get_any_created(self) -> Optional[Order]:
         """Получить 1 любой заказ со статусом 'Created'"""
-        pass
+        any_created_order = (
+            select(OrderModel)
+            .where(OrderModel.status == OrderStatus.CREATED.value)
+            .limit(1)
+        )
+        orm_order = self.session.execute(any_created_order).scalars().first()
+
+        if orm_order is None:
+            raise ValueError("No 'created' orders")
+        return orm_order.to_domain_object()
 
     def get_all_assigned(self) -> List[Order]:
         """Получить все назначенные заказы (со статусом 'Assigned')"""
-        pass
+        all_assigned_orders = select(OrderModel).where(
+            OrderModel.status == OrderStatus.ASSIGNED.value
+        )
 
+        if not all_assigned_orders:
+            raise ValueError("No 'assigned' orders")
+        return [x.to_domain_model() for x in all_assigned_orders]

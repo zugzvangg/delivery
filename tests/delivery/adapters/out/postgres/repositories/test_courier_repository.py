@@ -1,5 +1,5 @@
 import uuid
-
+import pytest
 from src.delivery.adapters.out.postgres.models.models import (
     CourierModel,
     StoragePlaceModel,
@@ -77,6 +77,9 @@ class TestCourierRepository:
         courier = courier_repo.get_by_id(courier_id)
         assert courier.id == courier1.id
         assert courier.name == courier1.name
+        # от случайного получает ошибку, так как его нет
+        with pytest.raises(ValueError):
+            courier_repo.get_by_id(uuid.uuid4())
 
     def test_get_all_free(self, db):
         courier_repo = CourierRepository(db)
