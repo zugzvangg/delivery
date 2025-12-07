@@ -28,7 +28,15 @@ class MoveCouriersUseCase(CommandHandler):
         self.courier_repo: CourierRepository = CourierRepository(session)
         self.order_repo: OrderRepository = OrderRepository(session)
 
-
     def handle(self, command: MoveCouriersCommand) -> None:
-        all_assigned_orders = self.order_repo.get_all_assigned()
-        pass
+        all_assigned_orders: list[Order] = self.order_repo.get_all_assigned()
+        for order in all_assigned_orders:
+            courier = self.courier_repo.get_by_id(order.courier_id)
+            courier.move(order.location)
+            self.courier_repo.update(courier)
+            # если совпадают, завершаем заказ
+            if courier.location == order.location:
+                courier.complete_order(order)
+                order.complete()
+                self.courier_repo.update(courier)
+                self.order_repo.update(order)

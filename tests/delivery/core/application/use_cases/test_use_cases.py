@@ -16,6 +16,10 @@ from src.delivery.core.application.use_cases.commands.create_order_command impor
     CreateOrderCommand,
     CreateOrderUseCase,
 )
+from src.delivery.core.application.use_cases.commands.move_couriers_command import (
+    MoveCouriersCommand,
+    MoveCouriersUseCase,
+)
 from src.delivery.core.application.use_cases.queries.get_all_couriers_query import (
     CourierDTO,
     GetAllCouriersQuery,
@@ -111,9 +115,25 @@ class TestOtherUseCases:
         assign_order_use_case: AssignOrderUseCase = AssignOrderUseCase(db)
         assign_order_use_case.handle(AssignOrderCommand())
 
-        # TOBEDONE
+        # TODO: доделать тесты, когда локации будут генериться неслучайно
 
     def test_move_couriers(self, db):
-        pass
+        # создаем заказ и курьера
+        create_courier_use_case: CreateCourierUseCase = CreateCourierUseCase(db)
+        create_courier_use_case.handle(CreateCourierCommand(name="Иван", speed=10))
 
+        create_order_use_case: CreateOrderUseCase = CreateOrderUseCase(db)
+        order_id = uuid.uuid4()
+        create_order_use_case.handle(
+            CreateOrderCommand(order_id=order_id, street="Pushkina", volume=5)
+        )
 
+        # назначаем заказ на курьера
+        assign_order_use_case: AssignOrderUseCase = AssignOrderUseCase(db)
+        assign_order_use_case.handle(AssignOrderCommand())
+
+        # двигаем курьера
+        move_courier_use_case: MoveCouriersUseCase = MoveCouriersUseCase(db)
+        move_courier_use_case.handle(MoveCouriersCommand())
+
+        # TODO: доделать тесты, когда локации будут генериться неслучайно
