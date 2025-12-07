@@ -50,12 +50,11 @@ class Location:
         return abs(self.x - other.x) + abs(self.y - other.y)
 
     @classmethod
-    def create_random(cls, self):
-        x = random.randint(self.__MIN_COORD, self.__MAX_COORD)
-        y = random.randint(self.__MIN_COORD, self.__MAX_COORD)
+    def create_random(cls):
+        x = random.randint(1, 10)
+        y = random.randint(1, 10)
         return cls(x=x, y=y)
 
     @classmethod
     def create(cls, x: int, y: int):
         return cls(x=x, y=y)
-
