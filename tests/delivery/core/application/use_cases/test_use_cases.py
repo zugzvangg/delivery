@@ -4,6 +4,10 @@ from src.delivery.core.application.use_cases.commands.add_storage_place_command 
     AddStoragePlaceCommand,
     AddStoragePlaceUseCase,
 )
+from src.delivery.core.application.use_cases.commands.assign_order import (
+    AssignOrderCommand,
+    AssignOrderUseCase,
+)
 from src.delivery.core.application.use_cases.commands.create_courier_command import (
     CreateCourierCommand,
     CreateCourierUseCase,
@@ -91,5 +95,25 @@ class TestOrderUseCases:
 
 
 class TestOtherUseCases:
-    def test_all(self):
+    def test_assigning_order_uses_case(self, db):
+        # создаем один заказ и одного дальнего, одного ближнего курьера
+        create_courier_use_case: CreateCourierUseCase = CreateCourierUseCase(db)
+        create_courier_use_case.handle(CreateCourierCommand(name="Иван", speed=10))
+        create_courier_use_case.handle(CreateCourierCommand(name="Петр", speed=20))
+
+        create_order_use_case: CreateOrderUseCase = CreateOrderUseCase(db)
+        order_id = uuid.uuid4()
+        command = CreateOrderCommand(order_id=order_id, street="Pushkina", volume=10)
+        create_order_use_case.handle(command)
+
+        # смотрим, что работает
+        # точность алгоритма не можем проверить точно, так как пока что локации создаются случайно
+        assign_order_use_case: AssignOrderUseCase = AssignOrderUseCase(db)
+        assign_order_use_case.handle(AssignOrderCommand())
+
+        # TOBEDONE
+
+    def test_move_couriers(self, db):
         pass
+
+
