@@ -8,17 +8,26 @@ from src.delivery.core.application.use_cases.commands.create_courier_command imp
     CreateCourierCommand,
     CreateCourierUseCase,
 )
-from src.delivery.core.application.use_cases.queries.get_all_courier_query import (
+from src.delivery.core.application.use_cases.commands.create_order_command import (
+    CreateOrderCommand,
+    CreateOrderUseCase,
+)
+from src.delivery.core.application.use_cases.queries.get_all_couriers_query import (
     CourierDTO,
     GetAllCouriersQuery,
     GetAllCouriersUseCase,
+)
+from src.delivery.core.application.use_cases.queries.get_not_completed_orders_query import (
+    GetNotCompletedOrdersQuery,
+    GetNotCompletedOrdersUseCase,
+    OrderDTO,
 )
 from src.delivery.core.domain.model.courier.courier import Courier
 from src.delivery.core.domain.model.order.order import Order
 
 
-class TestCreateCourierCommand:
-    def test_create_courier_command(self, db):
+class TestCourierUseCases:
+    def test_courier_use_cases(self, db):
         create_courier_use_case: CreateCourierUseCase = CreateCourierUseCase(db)
 
         command = CreateCourierCommand(name="Иван", speed=10)
@@ -55,3 +64,32 @@ class TestCreateCourierCommand:
         assert courier_dto.id == needed_courier.id
         assert courier_dto.name == needed_courier.name
         assert courier_dto.location == needed_courier.location
+
+
+class TestOrderUseCases:
+    def test_order_use_vases(self, db):
+        create_order_use_case: CreateOrderUseCase = CreateOrderUseCase(db)
+        order_id = uuid.uuid4()
+        command = CreateOrderCommand(order_id=order_id, street="Pushkina", volume=10)
+        create_order_use_case.handle(command)
+        created_order: Order = create_order_use_case.order_repo.get_by_id(order_id)
+        # заказ действительно есть в базе
+        assert created_order.volume == 10
+
+        get_all_not_completed_orders_use_case: GetNotCompletedOrdersUseCase = (
+            GetNotCompletedOrdersUseCase(db)
+        )
+        all_not_completed_orders: list[OrderDTO] = (
+            get_all_not_completed_orders_use_case.handle(GetNotCompletedOrdersQuery)
+        )
+        for order in all_not_completed_orders:
+            assert isinstance(order, OrderDTO)
+        assert len(all_not_completed_orders) == 1
+        not_completed_order = all_not_completed_orders[0]
+        assert not_completed_order.id == created_order.id
+        assert not_completed_order.location == created_order.location
+
+
+class TestOtherUseCases:
+    def test_all(self):
+        pass
