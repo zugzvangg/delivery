@@ -8,7 +8,13 @@ from src.delivery.core.application.use_cases.commands.create_courier_command imp
     CreateCourierCommand,
     CreateCourierUseCase,
 )
+from src.delivery.core.application.use_cases.queries.get_all_courier_query import (
+    CourierDTO,
+    GetAllCouriersQuery,
+    GetAllCouriersUseCase,
+)
 from src.delivery.core.domain.model.courier.courier import Courier
+from src.delivery.core.domain.model.order.order import Order
 
 
 class TestCreateCourierCommand:
@@ -31,6 +37,21 @@ class TestCreateCourierCommand:
             courier_id=created_courier.id, name="Рюкзак", total_volume=20
         )
         add_storage_place_use_case.handle(command)
-        needed_courier: Courier = create_courier_use_case.courier_repo.get_by_id(created_courier.id)
+        needed_courier: Courier = create_courier_use_case.courier_repo.get_by_id(
+            created_courier.id
+        )
         # добавилось
         assert len(needed_courier.storage_places) == 2
+
+        # и заодно тестим query
+
+        create_order_use_case: GetAllCouriersUseCase = GetAllCouriersUseCase(db)
+        all_couriers: list[CourierDTO] = create_order_use_case.handle(
+            GetAllCouriersQuery()
+        )
+        for c in all_couriers:
+            assert isinstance(c, CourierDTO)
+        courier_dto = all_couriers[0]
+        assert courier_dto.id == needed_courier.id
+        assert courier_dto.name == needed_courier.name
+        assert courier_dto.location == needed_courier.location

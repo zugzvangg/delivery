@@ -25,7 +25,10 @@ class MoveCouriersCommand(Command):
 class MoveCouriersUseCase(CommandHandler):
     def __init__(self, session: Session):
 
-        self.courier_repo: CourierRepository = OrderRepository(session)
+        self.courier_repo: CourierRepository = CourierRepository(session)
+        self.order_repo: OrderRepository = OrderRepository(session)
+
 
     def handle(self, command: MoveCouriersCommand) -> None:
+        all_assigned_orders = self.order_repo.get_all_assigned()
         pass
