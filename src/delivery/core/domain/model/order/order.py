@@ -93,3 +93,26 @@ class Order:
     @classmethod
     def create(cls, order_id: uuid.UUID, location: Location, volume: int):
         return cls(id=order_id, location=location, volume=volume)
+    
+    @classmethod
+    def _from_persistence(
+        cls,
+        id: uuid.UUID,
+        location: Location,
+        volume: int,
+        status: OrderStatus,
+        courier_id: Optional[uuid.UUID],
+    ) -> "Order":
+        """
+        Восстановление Order из persistence слоя.
+        Состояние может быть любым.
+        """
+        self = cls.__new__(cls)
+
+        self.__id = id
+        self.__location = location
+        self.__volume = volume
+        self.__courier_id = courier_id
+        self.__status = status
+
+        return self

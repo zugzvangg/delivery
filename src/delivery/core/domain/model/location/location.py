@@ -1,4 +1,8 @@
+import json
 import random
+from typing import Any, Dict, Optional
+
+from src.delivery.core.domain.model.common import WrongSerializationJsonError
 
 
 class WrongCoordinateError(Exception):
@@ -54,3 +58,4 @@ class Location:
     @classmethod
     def create(cls, x: int, y: int):
         return cls(x=x, y=y)
+

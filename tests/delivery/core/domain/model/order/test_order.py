@@ -251,3 +251,21 @@ class TestOrder:
 
             # Assert
             assert order.volume == volume
+
+    def test_order_from_persistence(self):
+        order_id = uuid.uuid4()
+        location = Location(x=5, y=5)
+
+        restored = Order._from_persistence(
+            id=order_id,
+            location=location,
+            volume=5,
+            courier_id=None,
+            status=OrderStatus.COMPLETED,
+        )
+        assert isinstance(restored, Order)
+        assert restored.id == order_id
+        assert restored.location == location
+        assert restored.volume == 5
+        assert restored.courier_id is None
+        assert restored.status == OrderStatus.COMPLETED
