@@ -27,6 +27,7 @@ class AssignOrderCommand(Command):
 
 class AssignOrderUseCase(CommandHandler):
     def __init__(self, session: Session):
+        self.session = session
         self.courier_repo: CourierRepository = CourierRepository(session)
         self.order_repo: OrderRepository = OrderRepository(session)
         self.order_dispatcher: OrderDispatcher = OrderDispatcher()
@@ -45,3 +46,4 @@ class AssignOrderUseCase(CommandHandler):
             return
         self.order_repo.update(order)
         self.courier_repo.update(best_courier)
+        self.session.commit()

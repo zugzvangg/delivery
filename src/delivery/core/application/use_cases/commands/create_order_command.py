@@ -45,6 +45,7 @@ class CreateOrderCommand(Command):
 
 class CreateOrderUseCase(CommandHandler):
     def __init__(self, session: Session):
+        self.session = session
         # NOTE: позже добавит GeoService зависимость, пока создаем случайную location
         self.order_repo: OrderRepository = OrderRepository(session)
 
@@ -54,3 +55,4 @@ class CreateOrderUseCase(CommandHandler):
 
         order = Order(id=command.order_id, location=location, volume=command.volume)
         self.order_repo.add(order)
+        self.session.commit()

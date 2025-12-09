@@ -45,6 +45,7 @@ class AddStoragePlaceCommand(Command):
 class AddStoragePlaceUseCase(CommandHandler):
     def __init__(self, session: Session):
         self.courier_repo: CourierRepository = CourierRepository(session)
+        self.session = session
 
     def handle(self, command: AddStoragePlaceCommand) -> None:
 
@@ -53,3 +54,4 @@ class AddStoragePlaceUseCase(CommandHandler):
         courier.add_storage_place(name=command.name, volume=command.total_volume)
         # и обновляем его в базе
         self.courier_repo.update(courier)
+        self.session.commit()

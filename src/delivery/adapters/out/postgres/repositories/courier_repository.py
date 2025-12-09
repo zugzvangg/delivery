@@ -23,9 +23,11 @@ class CourierRepository(CourierRepositoryInterface):
             raise ValueError("'courier' should be the domain model Order")
         orm_courier = CourierModel.from_domain_object(courier)
         self.session.add(orm_courier)
-        # также добавляем все storage_places
+        # из-за orphan не нужно добавлять отдельно
         # self.session.add_all(orm_courier.storage_places)
-        self.session.commit()
+        # нельзя завершать транзакцию в репозитории, только в юзкейсе
+        # self.session.commit()
+        self.session.flush()
         self.session.refresh(orm_courier)
         return orm_courier.to_domain_object()
 
@@ -41,7 +43,9 @@ class CourierRepository(CourierRepositoryInterface):
         db_courier.storage_places = [
             StoragePlaceModel.from_domain_object(x) for x in courier.storage_places
         ]
-        self.session.commit()
+        # нельзя завершать транзакцию в репозитории, только в юзкейсе
+        # self.session.commit()
+        self.session.flush()
         self.session.refresh(db_courier)
         return db_courier.to_domain_object()
 

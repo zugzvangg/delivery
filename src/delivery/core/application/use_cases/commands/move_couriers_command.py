@@ -24,7 +24,7 @@ class MoveCouriersCommand(Command):
 
 class MoveCouriersUseCase(CommandHandler):
     def __init__(self, session: Session):
-
+        self.session = session
         self.courier_repo: CourierRepository = CourierRepository(session)
         self.order_repo: OrderRepository = OrderRepository(session)
 
@@ -40,3 +40,4 @@ class MoveCouriersUseCase(CommandHandler):
                 order.complete()
                 self.courier_repo.update(courier)
                 self.order_repo.update(order)
+        self.session.commit()

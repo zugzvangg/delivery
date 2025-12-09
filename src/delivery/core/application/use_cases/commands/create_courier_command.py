@@ -37,6 +37,7 @@ class CreateCourierCommand(Command):
 
 class CreateCourierUseCase(CommandHandler):
     def __init__(self, session: Session):
+        self.session = session
         self.courier_repo: CourierRepository = CourierRepository(session)
 
     def handle(self, command: CreateCourierCommand) -> None:
@@ -45,3 +46,4 @@ class CreateCourierUseCase(CommandHandler):
 
         courier = Courier(name=command.name, speed=command.speed, location=location)
         self.courier_repo.add(courier)
+        self.session.commit()
