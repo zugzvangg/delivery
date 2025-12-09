@@ -16,8 +16,23 @@ from src.delivery.core.domain.model.location.location import Location
 
 @dataclass
 class CreateCourierCommand(Command):
-    name: str
-    speed: int
+    def __init__(self, name: str, speed: int):
+        if not name or not name.strip():
+            raise ValueError("name must be a non-empty string")
+
+        if not isinstance(speed, int) or speed <= 0:
+            raise ValueError("speed must be a positive integer")
+
+        self.__name = name
+        self.__speed = speed
+
+    @property
+    def name(self) -> str:
+        return self.__name
+
+    @property
+    def speed(self) -> int:
+        return self.__speed
 
 
 class CreateCourierUseCase(CommandHandler):
