@@ -20,8 +20,10 @@ class OrderRepository(OrderRepositoryInterface):
             raise ValueError("'order' should be the domain model Order")
         orm_order = OrderModel.from_domain_object(order)
         self.session.add(orm_order)
-        self.session.commit()
-        self.session.refresh(orm_order)  # подгружаем все поля после commit
+        # нельзя завершать транзакцию в репозитории, только в юзкейсе
+        # self.session.commit()
+        self.session.flush()
+        self.session.refresh(orm_order)
         return orm_order.to_domain_object()
 
     def update(self, order: Order) -> Order:
@@ -38,7 +40,9 @@ class OrderRepository(OrderRepositoryInterface):
         db_order.status = order.status.name
         db_order.courier_id = order.courier_id
 
-        self.session.commit()
+        # нельзя завершать транзакцию в репозитории, только в юзкейсе
+        # self.session.commit()
+        self.session.flush()
         self.session.refresh(db_order)
 
         return db_order.to_domain_object()
