@@ -18,5 +18,21 @@ services:
       timeout: 5s
       retries: 5
 
+    app:
+      build:
+        context: .
+        dockerfile: Dockerfile
+      ports:
+        - "8000:8000"
+      env_file:
+        - .env
+      environment:
+        - DB_HOST=postgres
+      depends_on:
+        postgres:
+          condition: service_healthy
+      volumes:
+        - .:/app
+
 volumes:
   postgres_data:
