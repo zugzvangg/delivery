@@ -1,19 +1,16 @@
-FROM python:3.11-slim
+FROM python:3.11-slim-bookworm
+
+COPY --from=ghcr.io/astral-sh/uv:0.9.9 /uv /bin/uv
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
-    gcc \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
-
 COPY pyproject.toml uv.lock ./
 
-RUN pip uv && \
-    uv sync
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install --system .
 
 COPY . .
 
 EXPOSE 8000
 
-CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "-m", "uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
