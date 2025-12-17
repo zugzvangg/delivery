@@ -6,8 +6,8 @@ from loguru import logger
 
 from api.background_jobs.assign_orders_job import assign_orders_job
 from api.background_jobs.move_couriers_job import move_couriers_job
-from src.delivery.adapters.out.postgres.models.models import Base
 from api.db import engine
+from src.delivery.adapters.out.postgres.models.models import Base
 
 
 @asynccontextmanager

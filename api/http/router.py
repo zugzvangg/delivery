@@ -4,7 +4,7 @@ from typing import List, Optional, Union
 from fastapi import APIRouter, Body, Depends
 
 from api.db import get_session
-from api.http.schemas import CourierTest, Error, NewCourierTest, Order
+from api.http.schemas import CreateCourier, Error, GetCourier, Location, Order
 from src.delivery.core.application.use_cases.commands.add_storage_place_command import (
     AddStoragePlaceCommand,
     AddStoragePlaceUseCase,
@@ -39,7 +39,7 @@ router = APIRouter(prefix="/api/v1")
     },
 )
 def create_courier(
-    body: NewCourierTest = Body(),
+    body: CreateCourier = Body(),
 ) -> Optional[Error]:
     """
     Добавить курьера
@@ -55,17 +55,27 @@ def create_courier(
 
 @router.get(
     "/couriers",
-    response_model=List[CourierTest],
+    response_model=List[GetCourier],
     responses={"default": {"model": Error}},
 )
-def get_couriers() -> Union[List[CourierTest], Error]:
+def get_couriers() -> Union[List[GetCourier], Error]:
     """
     Получить всех курьеров
     """
     query: GetAllCouriersQuery = GetAllCouriersQuery()
     with get_session() as db:
         use_case: GetAllCouriersUseCase = GetAllCouriersUseCase(db)
-    return use_case.handle(query)
+
+    dto_result = use_case.handle(query)
+    # переводим из DTO use_case в pydantic модели
+    result = [
+        GetCourier(
+            id=x.id, name=x.name, location=Location(x=x.location.x, y=x.location.y)
+        )
+        for x in dto_result
+    ]
+
+    return result
 
 
 @router.post("/orders", response_model=None, responses={"default": {"model": Error}})
@@ -95,4 +105,12 @@ def get_orders() -> Union[List[Order], Error]:
     query: GetNotCompletedOrdersQuery = GetNotCompletedOrdersQuery()
     with get_session() as db:
         use_case: GetNotCompletedOrdersUseCase = GetNotCompletedOrdersUseCase(db)
-        use_case.handle(query)
+
+    dto_result = use_case.handle(query)
+    # переводим из DTO use_case в pydantic модели
+    result = [
+        Order(id=x.id, location=Location(x=x.location.x, y=x.location.y))
+        for x in dto_result
+    ]
+
+    return result

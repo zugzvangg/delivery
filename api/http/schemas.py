@@ -33,7 +33,7 @@ class Order(BaseModel):
     }
 
 
-class NewCourierTest(BaseModel):
+class CreateCourier(BaseModel):
     """Модель для создания нового курьера."""
 
     name: Annotated[str, StringConstraints(min_length=1)] = Field(description="Имя")
@@ -44,8 +44,8 @@ class NewCourierTest(BaseModel):
     }
 
 
-class CourierTest(BaseModel):
-    """Модель курьера."""
+class GetCourier(BaseModel):
+    """Модель получения курьера."""
 
     id: UUID = Field(description="Идентификатор")
     name: str = Field(description="Имя")
