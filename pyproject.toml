@@ -20,6 +20,8 @@ dependencies = [
     "faststream[kafka]>=0.5.44,<0.6.0",
     "python-json-logger>=3.3.0,<4.0.0",
     "pytest-asyncio>=0.23.8",
+    "loguru>=0.7.3",
+    "psycopg2-binary>=2.9.11",
 ]
 
 [project.optional-dependencies]
