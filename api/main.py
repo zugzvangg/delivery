@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.lifespan import lifespan
 from api.settings import get_settings
+from api.http.router import router
 
 
 def get_application() -> FastAPI:
@@ -17,6 +18,7 @@ def get_application() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    application.include_router(router)
     return application
 
 
