@@ -25,14 +25,14 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - "8082:8082"
     env_file:
       - env.example
     command: >
       python -m uvicorn api.main:app
       --reload
       --host 0.0.0.0
-      --port 8000
+      --port 8082
     environment:
       - DB_HOST=postgres
     # depends_on:

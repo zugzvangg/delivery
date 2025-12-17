@@ -11,6 +11,6 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 COPY . .
 
-EXPOSE 8000
+EXPOSE 8082
 
-CMD ["python", "-m", "uvicorn", "api.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "-m", "uvicorn", "api.main:app", "--reload", "--host", "0.0.0.0", "--port", "8082"]
