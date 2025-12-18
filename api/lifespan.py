@@ -16,8 +16,8 @@ async def lifespan(app: FastAPI):
     Base.metadata.create_all(engine)
     scheduler = BackgroundScheduler()
     logger.info("Starting scheduler...")
-    scheduler.add_job(assign_orders_job, trigger="interval", seconds=1)
-    scheduler.add_job(move_couriers_job, trigger="interval", seconds=1)
+    scheduler.add_job(assign_orders_job, trigger="interval", seconds=100)
+    scheduler.add_job(move_couriers_job, trigger="interval", seconds=100)
     scheduler.start()
     yield
     scheduler.shutdown()

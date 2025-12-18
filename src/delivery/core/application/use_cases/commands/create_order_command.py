@@ -3,6 +3,7 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
+from src.delivery.adapters.out.grpc.geo.client import GRPCGeoService
 from src.delivery.adapters.out.postgres.repositories.order_repository import (
     OrderRepository,
 )
@@ -46,12 +47,11 @@ class CreateOrderCommand(Command):
 class CreateOrderUseCase(CommandHandler):
     def __init__(self, session: Session):
         self.session = session
-        # NOTE: позже добавит GeoService зависимость, пока создаем случайную location
         self.order_repo: OrderRepository = OrderRepository(session)
+        self.geo_service = GRPCGeoService()
 
     def handle(self, command: CreateOrderCommand) -> None:
-        # NOTE: потом будем получать из сервиса Geo
-        location: Location = Location.create_random()
+        location: Location = self.geo_service.get_location(command.street)
 
         order = Order(id=command.order_id, location=location, volume=command.volume)
         self.order_repo.add(order)
