@@ -20,7 +20,7 @@ def get_application() -> FastAPI:
         allow_headers=["*"],
     )
     application.include_router(router)
-    # application.include_router(kafka_router)
+    application.include_router(kafka_router)
     return application
 
 

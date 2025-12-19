@@ -9,7 +9,7 @@ from src.delivery.core.application.use_cases.commands.create_order_command impor
 # from .schemas import BasketConfirmedEvent
 
 # Инициализация брокера
-router = KafkaRouter(bootstrap_servers="kafka:9092", include_in_schema=False)
+router = KafkaRouter(bootstrap_servers="kafka:19092", include_in_schema=False)
 
 
 @router.subscriber(
