@@ -1,9 +1,15 @@
+networks:
+  microservices:
+    external: true
+
 services:
   postgres:
+    networks:
+      - microservices
     image: postgres:15-alpine
     platform: linux/arm64/v8
     ports:
-      - "5432:5432"
+      - "5433:5432"
     env_file:
       - env.example
     environment:
@@ -21,6 +27,8 @@ services:
       retries: 10
       start_period: 20s
   app:
+    networks:
+      - microservices
     build:
       context: .
       dockerfile: Dockerfile
@@ -38,6 +46,8 @@ services:
     # depends_on:
     #   postgres:
     #     condition: service_healthy
+    # extra_hosts:
+      # - "host.docker.internal:host-gateway"
     volumes:
       - .:/app
 
