@@ -22,4 +22,3 @@ async def lifespan(app: FastAPI):
     yield
     scheduler.shutdown()
     logger.info("Scheduler shutdown complete")
-    logger.info("Scheduler shutdown complete")
