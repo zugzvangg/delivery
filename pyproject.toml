@@ -22,6 +22,8 @@ dependencies = [
     "pytest-asyncio>=0.23.8",
     "loguru>=0.7.3",
     "psycopg2-binary>=2.9.11",
+    "grpcio>=1.76.0",
+    "grpcio-tools>=1.76.0",
 ]
 
 [project.optional-dependencies]
